@@ -2,22 +2,27 @@
 
 import asyncio
 
-
 from aiohttp import (ClientConnectorError,
                      ClientConnectorSSLError, ClientSession, ClientSSLError)
 
-TIMEOUT = 10
+from .config import DATA_FOLDER, HTTP_TIMEOUT
+from .utils import get_random_user_agent
 
 
 async def fetch(host, endpoint, session=None):
     """Returns the http response, the environment, the host."""
     try:
         async with session.get(
-                endpoint, verify_ssl=False, timeout=TIMEOUT) as response:
+                endpoint, verify_ssl=False, timeout=HTTP_TIMEOUT) as response:
             return await response.read(), host
     except (ClientConnectorError, ClientConnectorSSLError,
             ClientSSLError, asyncio.TimeoutError) as err:
         return err, host
+
+
+def get_user_agents():
+    """Returns 10 random user agents."""
+    return [get_random_user_agent() for _ in range(10)]
 
 
 def client_session():
