@@ -8,3 +8,5 @@ rmxbot.egg-*
 **/*.jpeg
 **/*.png
 
+scrasync.egg-info
+.pytest_cache
