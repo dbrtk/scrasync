@@ -5,11 +5,8 @@ import asyncio
 from aiohttp import (ClientConnectorError,
                      ClientConnectorSSLError, ClientSession, ClientSSLError)
 
-from .config import HTTP_TIMEOUT
+from .config import HTTP_TIMEOUT, TEXT_C_TYPES
 from .utils import get_random_user_agent
-
-
-TEXT_C_TYPES = ['text/plain', 'text/html']
 
 
 class Error(Exception):

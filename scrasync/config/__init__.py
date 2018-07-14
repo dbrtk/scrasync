@@ -12,3 +12,7 @@ USER_AGENTS_FILE = os.path.join(DATA_FOLDER, 'user-agents.txt')
 
 
 HTTP_TIMEOUT = 10
+
+
+# acceptable content_type
+TEXT_C_TYPES = ['text/plain', 'text/html']
