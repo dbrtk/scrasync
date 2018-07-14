@@ -1,5 +1,6 @@
 
 import re
+# from urllib.parse import urlparse
 
 
 class Error(Exception):
@@ -60,6 +61,11 @@ class ValidateURL(object):
         if not match and self.raise_error:
             raise ValidationError(self.message)
         return match
+
+
+def simple_validation(url):
+
+    pass
 
 
 if __name__ == '__main__':
