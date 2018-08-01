@@ -6,8 +6,8 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
+install_requires = []
 with open('requirements.txt', 'r') as _file:
-    install_requires = []
     for package in _file.readlines():
         package = package.strip()
         if package:

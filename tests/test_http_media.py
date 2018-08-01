@@ -13,7 +13,7 @@ def test_http_with_media():
     future = asyncio.ensure_future(run([url]))
 
     out = loop.run_until_complete(future)
-    assert isinstance(out[0][0], ContentTypeError)
+    assert isinstance(out[0][1], ContentTypeError)
 
 
 def test_fetch_head_media():
@@ -23,7 +23,7 @@ def test_fetch_head_media():
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(run([url], head_only=True))
 
-    out = loop.run_until_complete(future)
-    assert isinstance(out[0][0].content_type, str)
-    assert isinstance(out[0][1], str)
-    assert out[0][1] == url
+    out = loop.run_until_complete(future)[0]
+    assert isinstance(out[0].content_type, str)
+    assert out[1] is None
+    assert out[2] == url

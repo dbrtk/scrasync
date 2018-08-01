@@ -28,22 +28,22 @@ async def fetch(endpoint, session=None):
                 endpoint, verify_ssl=False, timeout=HTTP_TIMEOUT) as response:
             content_type = response.content_type
             if content_type in TEXT_C_TYPES:
-                return await response.read(), endpoint
+                return await response.read(), None, endpoint
             else:
                 del response
                 raise ContentTypeError(message=content_type)
     except (ClientConnectorError, ClientConnectorSSLError,
             ClientSSLError, asyncio.TimeoutError, ContentTypeError) as err:
-        return err, endpoint
+        return None, err, endpoint
 
 
 async def fetch_head(endpoint, session: ClientSession = None):
     """ Querying the endpoint for the headers. """
     try:
         async with session.head(endpoint) as response:
-            return response, endpoint
+            return response, None, endpoint
     except (asyncio.TimeoutError, ClientConnectorError) as err:
-        return err, endpoint
+        return None, err, endpoint
 
 
 def get_user_agents():
