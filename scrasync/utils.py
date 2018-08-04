@@ -20,5 +20,11 @@ def get_random_user_agent():
     return random_line(open(USER_AGENTS_FILE, 'r')).strip()
 
 
+def list_chunks(_list, n):
+
+    for i in range(0, len(_list)):
+        yield _list[i:i + n]
+
+
 if __name__ == "__main__":
     print(get_random_user_agent())

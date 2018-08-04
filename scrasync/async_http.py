@@ -28,7 +28,7 @@ async def fetch(endpoint, session=None):
                 endpoint, verify_ssl=False, timeout=HTTP_TIMEOUT) as response:
             content_type = response.content_type
             if content_type in TEXT_C_TYPES:
-                return await response.read(), None, endpoint
+                return await response.text(), None, endpoint
             else:
                 del response
                 raise ContentTypeError(message=content_type)

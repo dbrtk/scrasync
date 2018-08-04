@@ -6,7 +6,7 @@ from urllib import parse as urlparse
 import html.parser as HTMLParser
 
 from .misc.validate_url import ValidateURL, ValidationError
-from .tags.htmltags import HTML_TAGS
+from .html_tags import HTML_TAGS
 
 
 BLOCK_TAGS = ['script', 'style', 'link', 'meta']
@@ -33,7 +33,7 @@ def _clear_txt(_txt):
     return _txt.strip()
 
 
-class RmxParser(HTMLParser.HTMLParser):
+class WebParser(HTMLParser.HTMLParser):
     """ Parsing the html that is returned by the scraper. """
 
     def __init__(self, *args, **kwargs):
@@ -67,23 +67,24 @@ class RmxParser(HTMLParser.HTMLParser):
         self.open_tags = []
         self.tag_attrs = dict() if ENCODE_TO_JSON else ()
         try:
-            super(RmxParser, self).__init__(*args, **kwargs)
+            super(WebParser, self).__init__(*args, **kwargs)
         except TypeError:
             HTMLParser.HTMLParser.__init__(self, *args, **kwargs)
         else:
             pass
 
-    def feed(self, data, *args, **kwds):
-        """ feeding the parser with data """
-        try:
-            super(RmxParser, self).feed(data, *args, **kwds)
-        except TypeError:
-            if isinstance(data, str):
-                HTMLParser.HTMLParser.feed(self, data, *args, **kwds)
-            else:
-                pass
-        else:
-            pass
+    # def feed(self, data, *args, **kwds):
+    #     """ feeding the parser with data """
+    #     try:
+    #         super(WebParser, self).feed(data, *args, **kwds)
+    #     except TypeError:
+    #         print('feed -> type error')
+    #         if isinstance(data, str):
+    #             HTMLParser.HTMLParser.feed(self, data, *args, **kwds)
+    #         else:
+    #             pass
+    #     else:
+    #         pass
 
     def get_txt(self):
         """ returns self.txt_dt for processing and word count """

@@ -1,26 +1,63 @@
 
 import asyncio
+import json
+
+from celery import shared_task
 
 from .async_http import run
-from .config import TEXT_C_TYPES
+from .backend import scrape_set, scrape_get, scrape_del
+from .config import AIOHTTP_MAX_URLS, CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .misc.validate_url import ValidateURL
+from .tasks import parse_html
+from .utils import list_chunks
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 
 def check_content_type(request):
 
-    return request.content_type in TEXT_C_TYPES
+    if request:
+        return request.content_type in TEXT_C_TYPES
+    return False
 
 
 class Scraper(object):
 
-    def __init__(self, endpoint: list = None):
+    def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
+                 current_depth: int = 0, pages_count: int = 0,
+                 corpus_file_path: str = None):
+        """ The initialisation of the scraper. """
 
-        self.endpoint_list = self.validated_urls(endpoint)
+        self.endpoint_list = list(set(self.validated_urls(endpoint)))
         self.loop = asyncio.get_event_loop()
+
+        self.corpusid = corpusid
+        self.corpus_file_path = corpus_file_path
+
+        self.max_depth = depth
+        self.current_depth = current_depth
+        self.pages_count = pages_count
 
     def __call__(self):
 
+        self.endpoint_ditch_dupli()
         self.filter_on_ctype()
+        self.retrieve_pages()
+
+    def endpoint_ditch_dupli(self):
+
+        key = '_'.join([self.corpusid, 'endpoint'])
+        saved_endpoint = scrape_get(key=key)
+
+        if saved_endpoint:
+            saved_endpoint = json.loads(saved_endpoint)
+            self.endpoint_list = list(
+                set(self.endpoint_list) - set(saved_endpoint))
+            scrape_set(key=key, data=json.dumps(
+                self.endpoint_list + saved_endpoint))
+        else:
+            scrape_set(key=key, data=json.dumps(self.endpoint_list))
 
     def validated_urls(self, endpoint_list):
 
@@ -39,6 +76,36 @@ class Scraper(object):
     def retrieve_pages(self):
 
         for resp, err, url in self.get():
+
+            if err and not resp:
+                continue
+
+            scrape_set(url, self.corpusid, data=resp)
+            del resp
+
+            self.pages_count += 1
+            self.current_depth += 1
+
+            parameters = {
+                'kwargs': {
+                    'endpoint': url,
+                    'corpusid': self.corpusid,
+                    'corpus_file_path': self.corpus_file_path
+                }
+            }
+            if self.current_depth < self.max_depth and \
+               self.pages_count <= CORPUS_MAX_PAGES:
+                parameters['link'] = scrape_links.s(
+                    corpusid=self.corpusid,
+                    corpus_file_path=self.corpus_file_path,
+                    current_depth=self.current_depth,
+                    pages_count=self.pages_count,
+                    depth=self.max_depth
+                )
+
+            parse_html.apply_async(**parameters)
+        else:
+            # in case of a finished crawl.
             pass
 
     def filter_on_ctype(self):
@@ -53,6 +120,15 @@ class Scraper(object):
             pass
 
 
-async def process_response(response, url):
+@shared_task(bind=True)
+def scrape_links(self, links, **kwds):
 
-    pass
+    for items in list_chunks(links, AIOHTTP_MAX_URLS):
+        call_the_scraper.delay(items, **kwds)
+
+
+@shared_task
+def call_the_scraper(links, **kwds):
+
+    kwds['endpoint'] = links
+    Scraper(**kwds)()
