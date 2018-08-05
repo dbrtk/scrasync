@@ -1,6 +1,7 @@
 
 import asyncio
 import json
+import re
 
 from celery import shared_task
 
@@ -29,7 +30,9 @@ class Scraper(object):
                  corpus_file_path: str = None):
         """ The initialisation of the scraper. """
 
-        self.endpoint_list = list(set(self.validated_urls(endpoint)))
+        self.endpoint_list = process_links(
+            list(set(self.validated_urls(endpoint)))
+        )
         self.loop = asyncio.get_event_loop()
 
         self.corpusid = corpusid
@@ -132,3 +135,14 @@ def call_the_scraper(links, **kwds):
 
     kwds['endpoint'] = links
     Scraper(**kwds)()
+
+
+def process_links(links):
+    """Given a list of url addresses, returns a list of unique urls with
+    fragment identifeirs removed.
+    """
+
+    def cleanup(x): return re.sub(r'#.*$', '', x)
+
+    return list(set(cleanup(item) if '#' in item else item
+                    for item in links))
