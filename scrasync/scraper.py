@@ -4,10 +4,12 @@ import json
 import re
 
 from celery import shared_task
+from celery.contrib import rdb
 
 from .async_http import run
 from .backend import scrape_set, scrape_get
 from .config import AIOHTTP_MAX_URLS, CORPUS_MAX_PAGES, TEXT_C_TYPES
+from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
 from .tasks import parse_html
 from .utils import list_chunks
@@ -124,16 +126,18 @@ class Scraper(object):
 
 
 @shared_task(bind=True)
+@save_task_id
 def scrape_links(self, links, **kwds):
 
     for items in list_chunks(links, AIOHTTP_MAX_URLS):
-        call_the_scraper.delay(items, **kwds)
+        kwds['endpoint'] = links
+        call_the_scraper.delay(**kwds)
 
 
-@shared_task
-def call_the_scraper(links, **kwds):
+@shared_task(bind=True)
+@save_task_id
+def call_the_scraper(self, **kwds):
 
-    kwds['endpoint'] = links
     Scraper(**kwds)()
 
 

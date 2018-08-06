@@ -5,7 +5,9 @@ import redis
 
 from .config import REDIS_DB_HOST, REDIS_EXPIRATION_TIME
 
-REDIS_DB = redis.StrictRedis(host=REDIS_DB_HOST, port=6379, db=0)
+REDIS_DB = redis.StrictRedis(
+    host=REDIS_DB_HOST, port=6379, db=0, charset="utf-8",
+    decode_responses=True)
 
 
 def scrape_get(*args, key: str = None):
@@ -48,3 +50,34 @@ def make_key(*args):
     for i in args:
         m.update(bytes(str(i), 'utf-8'))
     return m.hexdigest()
+
+
+def key_exists(*args, key):
+
+    if args and not key:
+        key = make_key(*args)
+    return REDIS_DB.exists(key)
+
+
+def list_lpush(*args, key: str = None, value: str = None):
+
+    if args and not key:
+        key = make_key(*args)
+    REDIS_DB.lpush(key, value)
+
+
+def list_lrange(key, _from=0, _to=-1):
+    """ Retrieves the entire list. """
+
+    return REDIS_DB.lrange(key, _from, _to)
+
+
+def list_lrem(key, value):
+    """ Remove item from list. """
+
+    return REDIS_DB.lrem(key, 0, value)
+
+
+def task_ids_key(corpus_id):
+
+    return '{}_{}'.format(corpus_id, 'taskids')
