@@ -6,7 +6,7 @@ import re
 from celery import shared_task
 
 from .async_http import run
-from .backend import scrape_set, scrape_get, scrape_del
+from .backend import scrape_set, scrape_get
 from .config import AIOHTTP_MAX_URLS, CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .misc.validate_url import ValidateURL
 from .tasks import parse_html
@@ -24,6 +24,7 @@ def check_content_type(request):
 
 
 class Scraper(object):
+    """ Scraping web pages using asyncio with aiohttp. """
 
     def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
                  current_depth: int = 0, pages_count: int = 0,
@@ -49,7 +50,9 @@ class Scraper(object):
         self.retrieve_pages()
 
     def endpoint_ditch_dupli(self):
-
+        """ Getting rid of duplicated url(s). This method monitors endpoints
+        sent to the scraper.
+        """
         key = '_'.join([self.corpusid, 'endpoint'])
         saved_endpoint = scrape_get(key=key)
 
@@ -107,9 +110,6 @@ class Scraper(object):
                 )
 
             parse_html.apply_async(**parameters)
-        else:
-            # in case of a finished crawl.
-            pass
 
     def filter_on_ctype(self):
         """ Filtering the list of urls, based on the content type. """

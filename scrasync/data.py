@@ -1,8 +1,6 @@
 
 import re
 
-from celery.contrib import rdb
-
 from .parser import WebParser
 
 SPECIAL_TAGS = ['img']
@@ -19,6 +17,7 @@ class DataToTxt(object):
 
         self.url = url
         self.data = []
+        self.title = None
         self.http_resp = http_resp
         self.links = None
 
@@ -31,10 +30,18 @@ class DataToTxt(object):
 
         self.data = self.parser.get_struct_data()
         self.links = self.parser.get_links()
+        self.title = self.get_title()
 
-        # del self.parser
+        del self.parser
 
         self.data_to_corpus()
+
+    def get_title(self):
+
+        try:
+            return next(_[1].strip() for _ in self.data if _[0] == 'title')
+        except StopIteration as err:
+            return ''
 
     def data_to_corpus(self):
         """ Dumping data into a corpus file. """
@@ -46,13 +53,13 @@ class DataToTxt(object):
             if item[0] in BLOCK_TAGS:
                 continue
 
-            elif item[0] in MISCELLANEOUS_TAGS:
+            if item[0] in MISCELLANEOUS_TAGS:
                 if not re.match(r'\s\w+\b', item[1]):
                     continue
                 if not len(re.findall(r'\s[a-zA-Z]+\b', item[1])) > 4:
                     continue
-            else:
-                _data = clean_tagcontent(str(item[1]))
+
+            _data = str(item[1])
 
             if not isinstance(_data, str):
                 continue
@@ -64,5 +71,11 @@ class DataToTxt(object):
 
 def clean_tagcontent(txt):
     """ Cleaning up the tag content from newlines and tabs. """
+
+    # todo(): delete
+
+    txt = txt.strip()
     txt = re.sub(r'[\t\n]', ' ', txt)
-    return re.sub(r'\s+', ' ', txt)
+    txt = re.sub(r'\s+', ' ', txt)
+
+    return txt

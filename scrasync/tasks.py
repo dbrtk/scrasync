@@ -24,6 +24,7 @@ def parse_html(self, endpoint: str = None, corpusid: str = None,
         'links': links,
         'corpus_file_path': corpus_file_path,
         'data': txt_list,
+        'title': data.title,
         'endpoint': endpoint,
         'corpus_id': corpusid
     })

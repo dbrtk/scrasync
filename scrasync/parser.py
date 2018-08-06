@@ -19,8 +19,8 @@ HIRES_IMGS = 0
 
 
 def _clear_txt(_txt):
-    """ Cleaning up the text (such as the content of tags) from unnecessary
-    stuff. """
+    """ Cleaning up the text (the content of tags) from unnecessary characters.
+    """
     _ptrns = [
         r"^\s{0,}[\)\.\\|/,:;]",
         r"[\^|]",
@@ -31,6 +31,20 @@ def _clear_txt(_txt):
         if re.match(_ptrn, _txt):
             _txt = re.sub(_ptrn, "", _txt)
     return _txt.strip()
+
+
+def strip_txt(txt):
+    """ Removing string literals truncated with a double back-slash. """
+    patterns = [
+        r"\\[abfnrtv]",
+        r"\[abfnrtv]",
+        r"^b'$",
+    ]
+    for pttrn in patterns:
+        txt = re.sub(pttrn, ' ', txt)
+        txt = txt.strip()
+    txt = re.sub(r'\s+', ' ', txt)
+    return txt
 
 
 class WebParser(HTMLParser.HTMLParser):
@@ -102,6 +116,7 @@ class WebParser(HTMLParser.HTMLParser):
     def handle_starttag(self, tag, attrs):
         """ Actions performed when hitting a start tag. document... """
         attrs = dict(attrs) if attrs else {}
+
         if self.is_o and tag in NESTED_TAGS:
             if tag == 'a':
                 self.nested_tag, self.nested_is_o = tag, 1
@@ -166,12 +181,19 @@ class WebParser(HTMLParser.HTMLParser):
     def _handle_newline(self):
         """
         """
-        self.dt_buffer.append('\n')
+        # todo(): review this method.
+
+        # self.dt_buffer.append('\n')
+
+        pass
 
     def handle_data(self, data):
         """ handling data, such as text """
         if not self.data_is_txt:
             return False
+
+        data = strip_txt(data)
+
         if data:
             # todo(): review the word count algorithm
             # self.txt_dt += " %s " % data
@@ -183,6 +205,7 @@ class WebParser(HTMLParser.HTMLParser):
         """ Inserting chunks of text/string to structure data. Before insertion,
          data needs to be processed. """
         # _txt = _clear_txt(' '.join(self.dt_buffer.split()))
+
         _txt = _clear_txt(' '.join(self.dt_buffer))
         if _txt:
             if ENCODE_TO_JSON:
