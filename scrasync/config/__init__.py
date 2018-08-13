@@ -30,3 +30,7 @@ AIOHTTP_MAX_URLS = 25
 REDIS_DB_HOST = 'localhost'
 # the expiration time is set to one hour.
 REDIS_EXPIRATION_TIME = 60 * 60
+
+
+# the size of the buffer for reading responses streamed by aiohttp.
+AIOHTTP_BUFSIZE = 8 * 1024

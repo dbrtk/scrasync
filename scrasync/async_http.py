@@ -1,11 +1,12 @@
 
-
 import asyncio
+import tempfile
 
-from aiohttp import (ClientConnectorError,
-                     ClientConnectorSSLError, ClientSession, ClientSSLError)
+from aiohttp import (ClientConnectorError, ClientConnectorSSLError,
+                     ClientSession, ClientSSLError, ClientTimeout)
+from aiohttp.client_exceptions import ClientConnectionError
 
-from .config import HTTP_TIMEOUT, TEXT_C_TYPES
+from .config import AIOHTTP_BUFSIZE, HTTP_TIMEOUT, TEXT_C_TYPES
 from .utils import get_random_user_agent
 
 
@@ -21,19 +22,51 @@ class ContentTypeError(Error):
         self.message = "%s %s" % (self.msg, message)
 
 
+TIMEOUT = ClientTimeout(total=HTTP_TIMEOUT)
+
+ERRORS = (ClientConnectionError, ClientConnectorError, ClientConnectorSSLError,
+          ClientSSLError, asyncio.TimeoutError, ConnectionResetError,
+          ConnectionError, ContentTypeError, UnicodeDecodeError)
+
+
+async def fetch_totmp(endpoint, session=None):
+
+    try:
+        async with session.get(
+                endpoint, verify_ssl=False, timeout=TIMEOUT) as response:
+            if response.content_type not in TEXT_C_TYPES:
+                del response
+                return None, None, endpoint
+
+            file_name = None
+            encoding = 'utf-8'  # response.get_encoding()
+
+            with tempfile.NamedTemporaryFile(delete=False, mode='w+') as tmpf:
+                file_name = tmpf.name
+                while True:
+                    chunk = await response.content.read(AIOHTTP_BUFSIZE)
+                    if not chunk:
+                        break
+                    tmpf.write(chunk.decode(
+                        encoding=encoding, errors='strict'))
+        return file_name, None, endpoint
+    except ERRORS as err:
+        return None, err, endpoint
+
+
 async def fetch(endpoint, session=None):
     """Returns the http response, the environment."""
     try:
         async with session.get(
-                endpoint, verify_ssl=False, timeout=HTTP_TIMEOUT) as response:
-            content_type = response.content_type
-            if content_type in TEXT_C_TYPES:
-                return await response.text(), None, endpoint
-            else:
+                endpoint, verify_ssl=False, timeout=TIMEOUT) as response:
+
+            if response.content_type not in TEXT_C_TYPES:
                 del response
-                raise ContentTypeError(message=content_type)
-    except (ClientConnectorError, ClientConnectorSSLError,
-            ClientSSLError, asyncio.TimeoutError, ContentTypeError) as err:
+                return None, None, endpoint
+
+            return await response.text(encoding="utf-8"), None, endpoint
+
+    except ERRORS as err:
         return None, err, endpoint
 
 
@@ -70,6 +103,16 @@ async def run(endpoint_list: list, head_only: bool = False):
             else:
                 task = asyncio.ensure_future(fetch(endpoint, session=session))
             tasks.append(task)
+        return await asyncio.gather(*tasks)
+
+
+async def run_with_tmp(endpoint: list = None):
+
+    tasks = []
+    async with client_session() as session:
+        for _ in endpoint:
+            tasks.append(asyncio.ensure_future(
+                fetch_totmp(_, session=session)))
         return await asyncio.gather(*tasks)
 
 

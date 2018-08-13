@@ -4,14 +4,13 @@ import json
 import re
 
 from celery import shared_task
-from celery.contrib import rdb
 
-from .async_http import run
+from .async_http import run, run_with_tmp
 from .backend import scrape_set, scrape_get
 from .config import AIOHTTP_MAX_URLS, CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
-from .tasks import parse_html
+from .tasks import parse_and_save, parse_html
 from .utils import list_chunks
 
 import pprint
@@ -48,8 +47,9 @@ class Scraper(object):
     def __call__(self):
 
         self.endpoint_ditch_dupli()
-        self.filter_on_ctype()
-        self.retrieve_pages()
+
+        # self.filter_on_ctype()
+        self.retrieve()
 
     def endpoint_ditch_dupli(self):
         """ Getting rid of duplicated url(s). This method monitors endpoints
@@ -72,38 +72,46 @@ class Scraper(object):
         return [_ for _ in endpoint_list if ValidateURL()(value=_)]
 
     def head(self):
+        """ For a list of endpoints, retrieves the headers. """
 
         future = asyncio.ensure_future(run(self.endpoint_list, head_only=True))
         return self.loop.run_until_complete(future)
 
     def get(self):
+        """ For a list of endpoints (self.endpoint_list), retrieves the content,
+        making http (get) queries.
+        """
 
-        future = asyncio.ensure_future(run(self.endpoint_list))
+        # future = asyncio.ensure_future(run(self.endpoint_list))
+        future = asyncio.ensure_future(run_with_tmp(self.endpoint_list))
         return self.loop.run_until_complete(future)
 
-    def retrieve_pages(self):
+    def retrieve(self):
+        """ Retrieving pages using the responses saved to tempfiles. """
 
-        for resp, err, url in self.get():
+        self.current_depth += 1
 
-            if err and not resp:
+        for tmp_path, err, url in self.get():
+
+            if not tmp_path or err:
                 continue
 
-            scrape_set(url, self.corpusid, data=resp)
-            del resp
-
             self.pages_count += 1
-            self.current_depth += 1
 
             parameters = {
+
                 'kwargs': {
                     'endpoint': url,
+                    'path': tmp_path,
                     'corpusid': self.corpusid,
                     'corpus_file_path': self.corpus_file_path
                 }
             }
+
             if self.current_depth < self.max_depth and \
                self.pages_count <= CORPUS_MAX_PAGES:
-                parameters['link'] = scrape_links.s(
+
+                parameters['link'] = crawl_links.s(
                     corpusid=self.corpusid,
                     corpus_file_path=self.corpus_file_path,
                     current_depth=self.current_depth,
@@ -111,7 +119,7 @@ class Scraper(object):
                     depth=self.max_depth
                 )
 
-            parse_html.apply_async(**parameters)
+            parse_and_save.apply_async(**parameters)
 
     def filter_on_ctype(self):
         """ Filtering the list of urls, based on the content type. """
@@ -125,20 +133,28 @@ class Scraper(object):
             pass
 
 
+# @shared_task(bind=True)
+# @save_task_id
+# def scrape_links(self, links, **kwds):
+#     # todo(): delete
+#     for items in list_chunks(links, AIOHTTP_MAX_URLS):
+#         kwds['endpoint'] = items
+#         call_the_scraper.delay(**kwds)
+
+
 @shared_task(bind=True)
 @save_task_id
-def scrape_links(self, links, **kwds):
+def crawl_links(self, links, **kwds):
 
-    for items in list_chunks(links, AIOHTTP_MAX_URLS):
-        kwds['endpoint'] = links
-        call_the_scraper.delay(**kwds)
-
-
-@shared_task(bind=True)
-@save_task_id
-def call_the_scraper(self, **kwds):
-
+    kwds['endpoint'] = links
     Scraper(**kwds)()
+
+
+# @shared_task(bind=True)
+# @save_task_id
+# def call_the_scraper(self, **kwds):
+#     # todo(): delete
+#     Scraper(**kwds)()
 
 
 def process_links(links):

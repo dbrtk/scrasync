@@ -67,15 +67,3 @@ class DataToTxt(object):
         head = '{}\n\n'.format(head or self.url)
         self.out_data.append(head)
         del self.data
-
-
-def clean_tagcontent(txt):
-    """ Cleaning up the tag content from newlines and tabs. """
-
-    # todo(): delete
-
-    txt = txt.strip()
-    txt = re.sub(r'[\t\n]', ' ', txt)
-    txt = re.sub(r'\s+', ' ', txt)
-
-    return txt

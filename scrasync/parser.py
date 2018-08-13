@@ -36,7 +36,7 @@ def _clear_txt(_txt):
 def strip_txt(txt):
     """ Removing string literals truncated with a double back-slash. """
     patterns = [
-        r"\\[abfnrtv]",
+        # r"\\[abfnrtv]",
         r"\[abfnrtv]",
         r"^b'$",
     ]
@@ -65,7 +65,6 @@ class WebParser(HTMLParser.HTMLParser):
         self.links = []
         self.data_is_txt = True
 
-        self.txt_dt = ""
         self.struct_data = list()
         self.dt_buffer = []
         self.is_o = False
@@ -100,10 +99,6 @@ class WebParser(HTMLParser.HTMLParser):
     #     else:
     #         pass
 
-    def get_txt(self):
-        """ returns self.txt_dt for processing and word count """
-        return self.txt_dt
-
     def get_struct_data(self):
         """ returns structured data
         """
@@ -111,7 +106,7 @@ class WebParser(HTMLParser.HTMLParser):
 
     def get_data(self):
         """ returns the processed data """
-        return self.struct_data, self.txt_dt
+        return self.struct_data,
 
     def handle_starttag(self, tag, attrs):
         """ Actions performed when hitting a start tag. document... """
@@ -122,8 +117,8 @@ class WebParser(HTMLParser.HTMLParser):
                 self.nested_tag, self.nested_is_o = tag, 1
             else:
                 pass
-        elif tag == "br":
-            self._handle_newline()
+        # elif tag == "br":
+        #     self._handle_newline()
         elif tag in IGNORE_TAGS:
             pass
         else:
