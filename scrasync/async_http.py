@@ -29,7 +29,7 @@ ERRORS = (ClientConnectionError, ClientConnectorError, ClientConnectorSSLError,
           ConnectionError, ContentTypeError, UnicodeDecodeError)
 
 
-async def fetch_totmp(endpoint, session=None):
+async def fetch_chunks_totmp(endpoint, session=None):
 
     try:
         async with session.get(
@@ -49,6 +49,30 @@ async def fetch_totmp(endpoint, session=None):
                         break
                     tmpf.write(chunk.decode(
                         encoding=encoding, errors='strict'))
+        return file_name, None, endpoint
+    except ERRORS as err:
+        return None, err, endpoint
+
+
+async def fetch_totmp(endpoint, session=None):
+
+    try:
+        async with session.get(
+                endpoint, verify_ssl=False, timeout=TIMEOUT) as response:
+            if response.content_type not in TEXT_C_TYPES:
+                del response
+                return None, None, endpoint
+
+            file_name = None
+
+            with tempfile.NamedTemporaryFile(delete=False, mode='w+') as tmpf:
+                file_name = tmpf.name
+
+                txt = await response.text()
+                # encoding = response.get_encoding()
+
+                tmpf.write(txt)
+
         return file_name, None, endpoint
     except ERRORS as err:
         return None, err, endpoint
