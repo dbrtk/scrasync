@@ -83,6 +83,7 @@ class Scraper(object):
         """
 
         # future = asyncio.ensure_future(run(self.endpoint_list))
+
         future = asyncio.ensure_future(run_with_tmp(self.endpoint_list))
         return self.loop.run_until_complete(future)
 

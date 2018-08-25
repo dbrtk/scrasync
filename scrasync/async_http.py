@@ -39,16 +39,14 @@ async def fetch_chunks_totmp(endpoint, session=None):
                 return None, None, endpoint
 
             file_name = None
-            encoding = 'utf-8'  # response.get_encoding()
 
-            with tempfile.NamedTemporaryFile(delete=False, mode='w+') as tmpf:
+            with tempfile.NamedTemporaryFile(delete=False, mode='wb+') as tmpf:
                 file_name = tmpf.name
                 while True:
                     chunk = await response.content.read(AIOHTTP_BUFSIZE)
                     if not chunk:
                         break
-                    tmpf.write(chunk.decode(
-                        encoding=encoding, errors='strict'))
+                    tmpf.write(chunk)
         return file_name, None, endpoint
     except ERRORS as err:
         return None, err, endpoint
@@ -69,8 +67,6 @@ async def fetch_totmp(endpoint, session=None):
                 file_name = tmpf.name
 
                 txt = await response.text()
-                # encoding = response.get_encoding()
-
                 tmpf.write(txt)
 
         return file_name, None, endpoint

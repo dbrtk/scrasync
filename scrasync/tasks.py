@@ -1,7 +1,7 @@
 import os
 
-from celery import current_app, shared_task
-from celery.result import AsyncResult
+from celery import shared_task
+# from celery.result import AsyncResult
 
 import requests
 
@@ -14,6 +14,8 @@ from .decorators import save_task_id
 @save_task_id
 def parse_html(self, endpoint: str = None, corpusid: str = None,
                corpus_file_path: str = None):
+
+    # todo(): review and delete!!!!
 
     http_resp = scrape_get(endpoint, corpusid)
     scrape_del(endpoint, corpusid)
@@ -45,7 +47,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
     if not os.path.isfile(path):
         return []
 
-    with open(path, 'r', encoding='utf-8') as html_txt:
+    with open(path, 'r') as html_txt:
 
         _dt = DataToTxt(url=endpoint, http_resp=html_txt.read())
         _dt()

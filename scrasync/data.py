@@ -1,4 +1,6 @@
 
+import chardet
+import html
 import re
 
 from .parser import WebParser
@@ -18,7 +20,14 @@ class DataToTxt(object):
         self.url = url
         self.data = []
         self.title = None
-        self.http_resp = http_resp
+
+        if isinstance(http_resp, bytes):
+            self.encoding = chardet.detect(http_resp)['encoding']
+            self.http_resp = html.unescape(
+                http_resp.decode(self.encoding, 'ignore'))
+        else:
+            self.http_resp = html.unescape(http_resp)
+
         self.links = None
 
         self.parser = WebParser(url=self.url)
