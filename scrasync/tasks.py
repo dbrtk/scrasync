@@ -87,3 +87,8 @@ def scrape_complete(self, **kwds):
 
     # todo(): implement
     pass
+
+
+@shared_task
+def test_task(a, b):
+    return a + b

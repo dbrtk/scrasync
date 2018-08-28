@@ -7,14 +7,10 @@ from celery import shared_task
 
 from .async_http import run, run_with_tmp
 from .backend import scrape_set, scrape_get
-from .config import AIOHTTP_MAX_URLS, CORPUS_MAX_PAGES, TEXT_C_TYPES
+from .config import CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
-from .tasks import parse_and_save, parse_html
-from .utils import list_chunks
-
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
+from .tasks import parse_and_save
 
 
 def check_content_type(request):
@@ -35,7 +31,11 @@ class Scraper(object):
         self.endpoint_list = process_links(
             list(set(self.validated_urls(endpoint)))
         )
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_event_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
 
         self.corpusid = corpusid
         self.corpus_file_path = corpus_file_path
@@ -83,7 +83,6 @@ class Scraper(object):
         """
 
         # future = asyncio.ensure_future(run(self.endpoint_list))
-
         future = asyncio.ensure_future(run_with_tmp(self.endpoint_list))
         return self.loop.run_until_complete(future)
 
@@ -134,13 +133,16 @@ class Scraper(object):
             pass
 
 
-# @shared_task(bind=True)
-# @save_task_id
-# def scrape_links(self, links, **kwds):
-#     # todo(): delete
-#     for items in list_chunks(links, AIOHTTP_MAX_URLS):
-#         kwds['endpoint'] = items
-#         call_the_scraper.delay(**kwds)
+@shared_task(bind=True)
+@save_task_id
+def start_crawl(self, **kwds):
+    """ This task starts the crawler; it shoudl be the parent task for others,
+        that will follow.
+    """
+    endpoint = kwds.get('endpoint')
+    if isinstance(endpoint, str):
+        kwds['endpoint'] = [endpoint]
+    Scraper(**kwds)()
 
 
 @shared_task(bind=True)
@@ -149,13 +151,6 @@ def crawl_links(self, links, **kwds):
 
     kwds['endpoint'] = links
     Scraper(**kwds)()
-
-
-# @shared_task(bind=True)
-# @save_task_id
-# def call_the_scraper(self, **kwds):
-#     # todo(): delete
-#     Scraper(**kwds)()
 
 
 def process_links(links):

@@ -129,6 +129,7 @@ async def run(endpoint_list: list, head_only: bool = False):
 async def run_with_tmp(endpoint: list = None):
 
     tasks = []
+
     async with client_session() as session:
         for _ in endpoint:
             tasks.append(asyncio.ensure_future(

@@ -5,9 +5,6 @@ from functools import wraps
 
 from .backend import list_lpush, task_ids_key
 
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
-
 
 def save_task_id(func):
     """ this decorator saves the id of each task in the database; these are

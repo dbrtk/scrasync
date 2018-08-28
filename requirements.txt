@@ -2,3 +2,5 @@ aiohttp
 pytest
 requests
 redis
+Django
+celery

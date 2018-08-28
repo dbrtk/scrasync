@@ -86,19 +86,6 @@ class WebParser(HTMLParser.HTMLParser):
         else:
             pass
 
-    # def feed(self, data, *args, **kwds):
-    #     """ feeding the parser with data """
-    #     try:
-    #         super(WebParser, self).feed(data, *args, **kwds)
-    #     except TypeError:
-    #         print('feed -> type error')
-    #         if isinstance(data, str):
-    #             HTMLParser.HTMLParser.feed(self, data, *args, **kwds)
-    #         else:
-    #             pass
-    #     else:
-    #         pass
-
     def get_struct_data(self):
         """ returns structured data
         """

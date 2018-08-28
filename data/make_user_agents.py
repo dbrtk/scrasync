@@ -1,8 +1,7 @@
 
 
-
-
 import buffer
+
 
 def create_file():
     open('user-agents.txt', 'w+').close()
@@ -11,7 +10,6 @@ def create_file():
             for agent_string in v:
                 print(agent_string)
                 _file.write('%s\n' % agent_string)
-
 
 
 if __name__ == '__main__':
