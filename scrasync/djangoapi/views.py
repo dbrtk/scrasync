@@ -3,6 +3,7 @@ import asyncio
 import json
 
 from celery.result import AsyncResult
+from celery import chord
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -10,14 +11,17 @@ from ..backend import list_lrange, list_lrem, task_ids_key
 from .. import scraper
 from ..tasks import test_task
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 
 @csrf_exempt
 def create(request):
     """ Callig the task that will launch the crawler. """
 
     kwds = json.loads(request.body)
-    scraper.start_crawl.delay(**kwds)
 
+    scraper.start_crawl.apply_async(kwargs=kwds)
     return JsonResponse({'success': True})
 
 
