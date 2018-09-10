@@ -6,6 +6,7 @@ from celery import shared_task
 import requests
 
 from .backend import scrape_del, scrape_get
+from .config import CREATE_DATA_ENDPOINT
 from .data import DataToTxt
 from .decorators import save_task_id
 
@@ -77,8 +78,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
 @save_task_id
 def save_data(self, **kwds):
 
-    requests.post('http://localhost:5000/data/create-data-object/',
-                  json=kwds)
+    requests.post(CREATE_DATA_ENDPOINT, json=kwds)
 
 
 @shared_task(bind=True)
