@@ -11,16 +11,12 @@ from ..backend import list_lrange, list_lrem, task_ids_key
 from .. import scraper
 from ..tasks import test_task
 
-import pprint
-pp = pprint.PrettyPrinter(indent=4)
-
 
 @csrf_exempt
 def create(request):
     """ Callig the task that will launch the crawler. """
 
     kwds = json.loads(request.body)
-
     scraper.start_crawl.apply_async(kwargs=kwds)
     return JsonResponse({'success': True})
 
@@ -28,7 +24,6 @@ def create(request):
 def test_celery(request):
 
     res = test_task.apply_async(args=[1, 2]).get()
-
     return JsonResponse({'success': True, 'result': res})
 
 

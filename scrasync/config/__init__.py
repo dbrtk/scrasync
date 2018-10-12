@@ -11,8 +11,9 @@ DATA_FOLDER = os.path.abspath(os.path.join(
 USER_AGENTS_FILE = os.path.join(DATA_FOLDER, 'user-agents.txt')
 
 
-PROXIMITY_BOT_HOST = 'http://proximity-bot.net'
-PROXIMITY_USER = 'queeliot'
+# PROXIMITY_BOT_HOST = 'http://proximity-bot.net'
+PROXIMITY_BOT_HOST = 'http://localhost:5000'
+PROXIMITY_USER = 'username'
 
 CREATE_DATA_ENDPOINT = '/'.join(
     _ for _ in [PROXIMITY_BOT_HOST, 'data', 'create-data-object/'])

@@ -148,9 +148,7 @@ def start_crawl(self, **kwds):
 @shared_task(bind=True)
 def crawl_callback(self, corpusid):
 
-    print('crawl_callback called!!!!! The corpusid: %r.' % corpusid)
-    print(self)
-    print('Implement a call to rmx that will set the corpus as ready.')
+    pass
 
 
 @shared_task(bind=True)

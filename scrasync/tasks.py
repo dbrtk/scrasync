@@ -11,32 +11,32 @@ from .data import DataToTxt
 from .decorators import save_task_id
 
 
-@shared_task(bind=True)
-@save_task_id
-def parse_html(self, endpoint: str = None, corpusid: str = None,
-               corpus_file_path: str = None):
-
-    # todo(): review and delete!!!!
-
-    http_resp = scrape_get(endpoint, corpusid)
-    scrape_del(endpoint, corpusid)
-
-    data = DataToTxt(url=endpoint, http_resp=http_resp)
-    data()
-
-    txt_list = data.out_data
-    links = data.links
-
-    save_data.delay(**{
-        'links': links,
-        'corpus_file_path': corpus_file_path,
-        'data': txt_list,
-        'title': data.title,
-        'endpoint': endpoint,
-        'corpus_id': corpusid
-    })
-
-    return links
+# @shared_task(bind=True)
+# @save_task_id
+# def parse_html(self, endpoint: str = None, corpusid: str = None,
+#                corpus_file_path: str = None):
+#
+#     # todo(): review and delete!!!!
+#
+#     http_resp = scrape_get(endpoint, corpusid)
+#     scrape_del(endpoint, corpusid)
+#
+#     data = DataToTxt(url=endpoint, http_resp=http_resp)
+#     data()
+#
+#     txt_list = data.out_data
+#     links = data.links
+#
+#     save_data.delay(**{
+#         'links': links,
+#         'corpus_file_path': corpus_file_path,
+#         'data': txt_list,
+#         'title': data.title,
+#         'endpoint': endpoint,
+#         'corpus_id': corpusid
+#     })
+#
+#     return links
 
 
 @shared_task(bind=True)
@@ -77,16 +77,19 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
 @shared_task(bind=True)
 @save_task_id
 def save_data(self, **kwds):
-
+    """This task is saving a document on Proximity-bot -> DataModel and
+       CorpusModel. This method will be called when scraping a page completes
+       successfully.
+    """
     requests.post(CREATE_DATA_ENDPOINT, json=kwds)
 
 
-@shared_task(bind=True)
-@save_task_id
-def scrape_complete(self, **kwds):
-
-    # todo(): implement
-    pass
+# @shared_task(bind=True)
+# @save_task_id
+# def scrape_complete(self, **kwds):
+#
+#     # todo(): implement
+#     pass
 
 
 @shared_task
