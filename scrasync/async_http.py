@@ -29,29 +29,6 @@ ERRORS = (ClientConnectionError, ClientConnectorError, ClientConnectorSSLError,
           ConnectionError, ContentTypeError, UnicodeDecodeError)
 
 
-async def fetch_chunks_totmp(endpoint, session=None):
-
-    try:
-        async with session.get(
-                endpoint, verify_ssl=False, timeout=TIMEOUT) as response:
-            if response.content_type not in TEXT_C_TYPES:
-                del response
-                return None, None, endpoint
-
-            file_name = None
-
-            with tempfile.NamedTemporaryFile(delete=False, mode='wb+') as tmpf:
-                file_name = tmpf.name
-                while True:
-                    chunk = await response.content.read(AIOHTTP_BUFSIZE)
-                    if not chunk:
-                        break
-                    tmpf.write(chunk)
-        return file_name, None, endpoint
-    except ERRORS as err:
-        return None, err, endpoint
-
-
 async def fetch_totmp(endpoint, session=None):
 
     try:
@@ -60,8 +37,6 @@ async def fetch_totmp(endpoint, session=None):
             if response.content_type not in TEXT_C_TYPES:
                 del response
                 return None, None, endpoint
-
-            file_name = None
 
             with tempfile.NamedTemporaryFile(delete=False, mode='w+') as tmpf:
                 file_name = tmpf.name

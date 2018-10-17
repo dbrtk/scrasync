@@ -2,7 +2,6 @@
 
 from functools import wraps
 
-
 from .backend import list_lpush, task_ids_key
 
 
