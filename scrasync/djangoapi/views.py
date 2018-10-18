@@ -3,7 +3,6 @@ import asyncio
 import json
 
 from celery.result import AsyncResult
-from celery import chord
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 

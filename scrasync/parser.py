@@ -3,7 +3,7 @@ import re
 import uuid
 from urllib import parse as urlparse
 
-import html.parser as HTMLParser
+import html.parser as html_parser
 
 from .misc.validate_url import ValidateURL, ValidationError
 from .html_tags import HTML_TAGS
@@ -47,7 +47,7 @@ def strip_txt(txt):
     return txt
 
 
-class WebParser(HTMLParser.HTMLParser):
+class WebParser(html_parser.HTMLParser):
     """ Parsing the html that is returned by the scraper. """
 
     def __init__(self, *args, **kwargs):
@@ -82,7 +82,7 @@ class WebParser(HTMLParser.HTMLParser):
         try:
             super(WebParser, self).__init__(*args, **kwargs)
         except TypeError:
-            HTMLParser.HTMLParser.__init__(self, *args, **kwargs)
+            html_parser.HTMLParser.__init__(self, *args, **kwargs)
         else:
             pass
 
@@ -93,6 +93,7 @@ class WebParser(HTMLParser.HTMLParser):
 
     def get_data(self):
         """ returns the processed data """
+        # todo(): delete
         return self.struct_data,
 
     def handle_starttag(self, tag, attrs):
@@ -159,15 +160,6 @@ class WebParser(HTMLParser.HTMLParser):
         if self.nested_list and self.with_nested:
             for item in self.nested_list:
                 self.struct_data.append(item)
-
-    def _handle_newline(self):
-        """
-        """
-        # todo(): review this method.
-
-        # self.dt_buffer.append('\n')
-
-        pass
 
     def handle_data(self, data):
         """ handling data, such as text """
@@ -276,7 +268,7 @@ class WebParser(HTMLParser.HTMLParser):
 
     def close(self):
         """ closing the parser """
-        HTMLParser.HTMLParser.close(self)
+        html_parser.HTMLParser.close(self)
 
     def __make_url(self, url, validate=True):
         """ Making a url - used for making urls pointing to media (i.e. img).

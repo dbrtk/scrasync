@@ -19,7 +19,7 @@ setup(
     version="0.0.1",
     author="Dominik Bartkowski",
     author_email="dominik.bartkowski@gmail.com",
-    description=("Scraping web pages asynchronously."),
+    description="Scraping web pages asynchronously.",
     license="BSD",
     keywords="web scraper asyncio",
     url="http://dbrtk.net",

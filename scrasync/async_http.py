@@ -6,7 +6,7 @@ from aiohttp import (ClientConnectorError, ClientConnectorSSLError,
                      ClientSession, ClientSSLError, ClientTimeout)
 from aiohttp.client_exceptions import ClientConnectionError
 
-from .config import AIOHTTP_BUFSIZE, HTTP_TIMEOUT, TEXT_C_TYPES
+from .config import HTTP_TIMEOUT, TEXT_C_TYPES
 from .utils import get_random_user_agent
 
 

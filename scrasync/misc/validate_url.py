@@ -62,11 +62,6 @@ class ValidateURL(object):
         return match
 
 
-def simple_validation(url):
-
-    pass
-
-
 if __name__ == '__main__':
 
     url = 'http://gnu.org'
