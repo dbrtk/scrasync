@@ -28,3 +28,12 @@ The parameters required by the Scraper:
 * corpus_file_path - the path where files are stored on the remote or local machine.
 
 The parameters corpusid and corpus_file_path are specific to rmxbot.
+
+## Configuration of scrasync
+
+The following variables in the config (https://github.com/dbrtk/scrasync/blob/master/scrasync/config/__init__.py) should be updated:
+* PROXIMITY_BOT_HOST - the host of the server that contains rmxbot;
+* PROXIMITY_USER- - the username on the server that contains rmxbot (used by rsync/ssh);
+* HTTP_TIMEOUT - the timeout set on aiohttp' http getter;
+
+Other config variables are of interest, i.e. CORPUS_MAX_PAGES, AIOHTTP_MAX_URLS. 
