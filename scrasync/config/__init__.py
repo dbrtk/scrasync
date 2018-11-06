@@ -12,7 +12,7 @@ USER_AGENTS_FILE = os.path.join(DATA_FOLDER, 'user-agents.txt')
 
 
 # PROXIMITY_BOT_HOST = 'http://proximity-bot.net'
-PROXIMITY_BOT_HOST = 'http://localhost:8000'
+PROXIMITY_BOT_HOST = 'http://rmxbotweb:8000'
 PROXIMITY_USER = 'username'
 
 CREATE_DATA_ENDPOINT = '/'.join(
@@ -34,7 +34,7 @@ AIOHTTP_MAX_URLS = 25
 
 # REDIS CONFIG
 # redis db host
-REDIS_DB_HOST = 'localhost'
+REDIS_DB_HOST = 'scrasyncredis'
 # the expiration time is set to one hour.
 REDIS_EXPIRATION_TIME = 60 * 60
 
