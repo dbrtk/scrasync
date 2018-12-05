@@ -1,3 +1,4 @@
+import json
 import os
 
 from celery import shared_task
@@ -50,7 +51,7 @@ def save_data(self, **kwds):
        CorpusModel. This method will be called when scraping a page completes
        successfully.
     """
-    requests.post(CREATE_DATA_ENDPOINT, json=kwds)
+    requests.post(CREATE_DATA_ENDPOINT, data={'payload': json.dumps(kwds)})
 
 
 @shared_task
