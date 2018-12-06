@@ -35,7 +35,9 @@ AIOHTTP_MAX_URLS = 25
 
 # REDIS CONFIG
 # redis db host
-REDIS_DB_HOST = 'scrasyncredis'
+REDIS_DB_HOST = os.environ.get('REDIS_DB_HOST')
+
+
 # the expiration time is set to one hour.
 REDIS_EXPIRATION_TIME = 60 * 60
 
