@@ -4,4 +4,4 @@ pytest
 requests
 Django
 celery
-redis==2.10.6
+redis
