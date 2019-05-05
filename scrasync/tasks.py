@@ -1,9 +1,6 @@
-import json
 import os
 
-import requests
-
-from .config import CREATE_DATA_ENDPOINT
+from .config.celeryconf import RMXBOT_TASKS
 from .data import DataToTxt
 from .decorators import save_task_id
 from .app import celery
@@ -51,9 +48,9 @@ def save_data(self, **kwds):
        CorpusModel. This method will be called when scraping a page completes
        successfully.
     """
-    requests.post(CREATE_DATA_ENDPOINT, data={'payload': json.dumps(kwds)})
+    celery.send_task(RMXBOT_TASKS.get('create_data'), kwargs=kwds)
 
 
-@celery.task(bind=True)
+@celery.task
 def test_task(a, b):
-    return a + b
+    return int(a) + int(b)

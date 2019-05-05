@@ -2,28 +2,25 @@
 import asyncio
 
 from celery.result import AsyncResult
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 
+from .app import celery
 from .backend import list_lrange, list_lrem, task_ids_key
-from . import scraper
 from .tasks import test_task
 
 scrasync_app = Blueprint('scrasync_app', __name__, root_path='/')
 
 
-@scrasync_app.route('/create/', methods=['POST'])
-def create():
-    """ Callig the task that will launch the crawler. """
+@scrasync_app.route('/')
+def home():
 
-    kwds = request.get_json()
-    scraper.start_crawl.apply_async(kwargs=kwds)
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'text': 'Home page of scrasync'})
 
 
 @scrasync_app.route('/test-celery/')
-def test_celery(request):
+def test_celery():
 
-    res = test_task.apply_async(args=[1, 2]).get()
+    res = test_task.delay(1, 2).get()
     return jsonify({'success': True, 'result': res})
 
 
@@ -55,6 +52,7 @@ def crawl_ready(corpusid):
 
 
 def check_readiness(corpusid):
+    """Check f the crawl is ready."""
     key = task_ids_key(corpusid)
     task_ids = list_lrange(key)
     out = {}
@@ -62,7 +60,7 @@ def check_readiness(corpusid):
     for _id in task_ids:
         _id = str(_id)
 
-        res = AsyncResult(_id)
+        res = AsyncResult(_id, app=celery)
         is_ready = res.ready()
 
         if is_ready:

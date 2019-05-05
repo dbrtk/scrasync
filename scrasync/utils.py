@@ -2,7 +2,7 @@
 
 import random
 
-from .config import USER_AGENTS_FILE
+from scrasync.config.appconf import USER_AGENTS_FILE
 
 
 def random_line(afile):

@@ -3,11 +3,10 @@ import asyncio
 import json
 import re
 
-from celery import shared_task
-
+from .app import celery
 from .async_http import run, run_with_tmp
 from .backend import scrape_set, scrape_get
-from .config import CORPUS_MAX_PAGES, TEXT_C_TYPES
+from scrasync.config.appconf import CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
@@ -133,7 +132,7 @@ class Scraper(object):
             pass
 
 
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def start_crawl(self, **kwds):
     """ This task starts the crawler; it shoudl be the parent task for others,
@@ -145,13 +144,13 @@ def start_crawl(self, **kwds):
     Scraper(**kwds)()
 
 
-@shared_task(bind=True)
-def crawl_callback(self, corpusid):
+@celery.task
+def crawl_callback(corpusid):
 
     pass
 
 
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def crawl_links(self, links, **kwds):
 

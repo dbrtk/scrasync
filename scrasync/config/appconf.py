@@ -1,7 +1,6 @@
 
 import os
 
-
 __HERE = os.path.abspath(__file__)
 
 
@@ -10,14 +9,7 @@ DATA_FOLDER = os.path.abspath(os.path.join(
 
 USER_AGENTS_FILE = os.path.join(DATA_FOLDER, 'user-agents.txt')
 
-
-# PROXIMITY_BOT_HOST = 'http://proximity-bot.net'
-PROXIMITY_BOT_HOST = os.environ.get('PROXIMITYBOT_ENDPOINT')
-
 PROXIMITY_USER = 'username'
-
-CREATE_DATA_ENDPOINT = '/'.join(
-    _ for _ in [PROXIMITY_BOT_HOST, 'data', 'create-data-object/'])
 
 HTTP_TIMEOUT = 10
 
