@@ -1,15 +1,15 @@
 import json
 import os
 
-from celery import shared_task
 import requests
 
 from .config import CREATE_DATA_ENDPOINT
 from .data import DataToTxt
 from .decorators import save_task_id
+from .app import celery
 
 
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def parse_and_save(self, path: str = None, endpoint: str = None,
                    corpusid: str = None, corpus_file_path: str = None):
@@ -44,7 +44,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
     return links
 
 
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def save_data(self, **kwds):
     """This task is saving a document on Proximity-bot -> DataModel and
@@ -54,6 +54,6 @@ def save_data(self, **kwds):
     requests.post(CREATE_DATA_ENDPOINT, data={'payload': json.dumps(kwds)})
 
 
-@shared_task
+@celery.task(bind=True)
 def test_task(a, b):
     return a + b

@@ -2,6 +2,9 @@ aiohttp
 chardet
 pytest
 requests
-Django
+
+flask
+
 celery
-redis==2.10.6
+redis
+

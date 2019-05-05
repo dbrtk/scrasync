@@ -1,6 +1,7 @@
 
 import os
 
+__all__ = ['celeryconf']
 
 __HERE = os.path.abspath(__file__)
 

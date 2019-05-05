@@ -1,0 +1,2 @@
+
+celery worker -A celery_worker --loglevel=info -Q scrasync
