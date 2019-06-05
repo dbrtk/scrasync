@@ -144,12 +144,6 @@ def start_crawl(self, **kwds):
     Scraper(**kwds)()
 
 
-@celery.task
-def crawl_callback(corpusid):
-
-    pass
-
-
 @celery.task(bind=True)
 @save_task_id
 def crawl_links(self, links, **kwds):

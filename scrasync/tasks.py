@@ -1,9 +1,12 @@
 import os
 
+from celery.result import AsyncResult
+
+from .app import celery
+from .backend import list_lrange, list_lrem, task_ids_key
 from .config.celeryconf import RMXBOT_TASKS
 from .data import DataToTxt
 from .decorators import save_task_id
-from .app import celery
 
 
 @celery.task(bind=True)
@@ -53,4 +56,34 @@ def save_data(self, **kwds):
 
 @celery.task
 def test_task(a, b):
+
+    # todo(): delete
+
     return int(a) + int(b)
+
+
+@celery.task
+def crawl_ready(corpusid):
+    """Check if the crawl is ready."""
+    key = task_ids_key(corpusid)
+    task_ids = list_lrange(key)
+    out = {}
+    count = 0
+    for _id in task_ids:
+        _id = str(_id)
+
+        res = AsyncResult(_id, app=celery)
+        is_ready = res.ready()
+
+        if is_ready:
+            list_lrem(key, _id)
+        else:
+            out[_id] = is_ready
+            count += 1
+    if out:
+        return {'ready': False, 'tasks': out, 'count': count}
+    else:
+        # todo(): remove the list from redis
+        pass
+
+    return {'ready': True}
