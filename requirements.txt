@@ -1,10 +1,8 @@
 aiohttp
 chardet
 pytest
+
 requests
 
-flask
-
 celery
-redis
 
