@@ -1,4 +1,6 @@
+import hashlib
 import os
+import uuid
 
 from celery.result import AsyncResult
 
@@ -19,39 +21,39 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
         return []
 
     with open(path, 'r') as html_txt:
-
         _dt = DataToTxt(url=endpoint, http_resp=html_txt.read())
         _dt()
 
     if not _dt:
         raise RuntimeError(_dt)
-
     links = _dt.links
 
-    save_data.delay(**{
-        'links': links,
+    # uid = uuid.uuid4().hex
+    #
+    # hasher = hashlib.md5()
+    # with open(os.path.join(corpus_file_path, uid), 'a+') as _file:
+    #     hasher.update(bytes(_dt.title, 'utf-8'))
+    #     _file.write(_dt.title)
+    #     for txt in _dt.out_data:
+    #         hasher.update(bytes(txt, 'utf-8'))
+    #         _file.write(txt)
+    # texthash = hasher.hexdigest()
+
+    celery.send_task(RMXBOT_TASKS.get('create_data'), kwargs={
+        'corpusid': corpusid,
+        # 'fileid': uid,
         'corpus_file_path': corpus_file_path,
-        'data': _dt.out_data,
-        'title': _dt.title,
         'endpoint': endpoint,
-        'corpus_id': corpusid
+        'title': _dt.title,
+        'data': _dt.out_data,
+        # 'texthash': texthash,
+        'links': links,
     })
 
     os.remove(path)
     if os.path.exists(path) and os.path.isfile(path):
         raise RuntimeError(path)
-
     return links
-
-
-@celery.task(bind=True)
-@save_task_id
-def save_data(self, **kwds):
-    """This task is saving a document on Proximity-bot -> DataModel and
-       CorpusModel. This method will be called when scraping a page completes
-       successfully.
-    """
-    celery.send_task(RMXBOT_TASKS.get('create_data'), kwargs=kwds)
 
 
 @celery.task

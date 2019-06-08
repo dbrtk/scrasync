@@ -17,9 +17,19 @@ CELERY_ROUTES = {
     'scrasync.scraper.*': {'queue': 'scrasync'},
 
     'rmxbot.tasks.*': {'queue': 'rmxbot'},
+
+    'extractxt.tasks.*': {'queue': 'extractxt'},
 }
 
 RMXBOT_TASKS = {
 
-    'create_data': 'rmxbot.tasks.data.call_data_create'
+    'create_data': 'rmxbot.tasks.data.create_from_webpage',
+
+    'file_extract_callback': 'rmxbot.tasks.corpus.file_extract_callback',
+
 }
+EXTRACTXT_TASKS = {
+
+    'extract_from_txt': 'extractxt.tasks.extract_from_txt',
+}
+

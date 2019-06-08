@@ -2,8 +2,5 @@ aiohttp
 chardet
 pytest
 
-requests
-
 celery
 redis
-
