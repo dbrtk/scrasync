@@ -4,7 +4,7 @@ from celery import Celery
 
 from scrasync.config import celeryconf
 
-os.environ['REDIS_HOST_NAME'] = 'localhost'
+# os.environ['REDIS_HOST_NAME'] = 'localhost'
 
 
 celery = Celery('scrasync')
