@@ -1,6 +1,9 @@
 # this should be ran using python:3.6
 FROM python:3.6
 
+# Creating a user tu run the process
+RUN groupadd -r scrasyncuser && useradd -r -g scrasyncuser scrasyncuser
+
 # Set the working directory to /app
 WORKDIR /app
 
@@ -13,6 +16,8 @@ ENV REDIS_HOST_NAME 'redis'
 RUN chmod +x /app/celery.sh
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN pip install -U pip && pip install .
 
+RUN chown -R scrasyncuser:scrasyncuser /app
 
+USER scrasyncuser
