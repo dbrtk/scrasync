@@ -14,7 +14,7 @@ from .decorators import save_task_id
 @celery.task(bind=True)
 @save_task_id
 def parse_and_save(self, path: str = None, endpoint: str = None,
-                   corpusid: str = None, corpus_file_path: str = None):
+                   corpusid: str = None):
     """ Calling the html parser and saving the data to file. """
 
     if not os.path.isfile(path):
@@ -28,25 +28,11 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
         raise RuntimeError(_dt)
     links = _dt.links
 
-    # uid = uuid.uuid4().hex
-    #
-    # hasher = hashlib.md5()
-    # with open(os.path.join(corpus_file_path, uid), 'a+') as _file:
-    #     hasher.update(bytes(_dt.title, 'utf-8'))
-    #     _file.write(_dt.title)
-    #     for txt in _dt.out_data:
-    #         hasher.update(bytes(txt, 'utf-8'))
-    #         _file.write(txt)
-    # texthash = hasher.hexdigest()
-
     celery.send_task(RMXBOT_TASKS.get('create_data'), kwargs={
         'corpusid': corpusid,
-        # 'fileid': uid,
-        'corpus_file_path': corpus_file_path,
         'endpoint': endpoint,
         'title': _dt.title,
         'data': _dt.out_data,
-        # 'texthash': texthash,
         'links': links,
     })
 
@@ -71,6 +57,7 @@ def crawl_ready(corpusid):
     task_ids = list_lrange(key)
     out = {}
     count = 0
+
     for _id in task_ids:
         _id = str(_id)
 
