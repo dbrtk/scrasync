@@ -27,7 +27,7 @@ AIOHTTP_MAX_URLS = 25
 
 # REDIS CONFIG
 # redis db host
-REDIS_DB_HOST = os.environ.get('REDIS_HOST_NAME')
+REDIS_HOST_NAME = os.environ.get('REDIS_HOST_NAME')
 
 
 # the expiration time is set to one hour.
