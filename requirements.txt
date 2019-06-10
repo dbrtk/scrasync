@@ -1,7 +1,6 @@
 aiohttp
 chardet
 pytest
-requests
-Django
+
 celery
 redis

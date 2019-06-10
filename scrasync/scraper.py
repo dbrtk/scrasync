@@ -3,11 +3,10 @@ import asyncio
 import json
 import re
 
-from celery import shared_task
-
+from .app import celery
 from .async_http import run, run_with_tmp
 from .backend import scrape_set, scrape_get
-from .config import CORPUS_MAX_PAGES, TEXT_C_TYPES
+from scrasync.config.appconf import CORPUS_MAX_PAGES, TEXT_C_TYPES
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
@@ -25,7 +24,7 @@ class Scraper(object):
 
     def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
                  current_depth: int = 0, pages_count: int = 0,
-                 corpus_file_path: str = None):
+                 target_path: str = None):
         """ The initialisation of the scraper. """
 
         self.endpoint_list = process_links(
@@ -38,7 +37,7 @@ class Scraper(object):
             asyncio.set_event_loop(self.loop)
 
         self.corpusid = corpusid
-        self.corpus_file_path = corpus_file_path
+        self.target_path = target_path
 
         self.max_depth = depth
         self.current_depth = current_depth
@@ -103,8 +102,7 @@ class Scraper(object):
                 'kwargs': {
                     'endpoint': url,
                     'path': tmp_path,
-                    'corpusid': self.corpusid,
-                    'corpus_file_path': self.corpus_file_path
+                    'corpusid': self.corpusid
                 }
             }
 
@@ -113,7 +111,6 @@ class Scraper(object):
 
                 parameters['link'] = crawl_links.s(
                     corpusid=self.corpusid,
-                    corpus_file_path=self.corpus_file_path,
                     current_depth=self.current_depth,
                     pages_count=self.pages_count,
                     depth=self.max_depth
@@ -133,7 +130,7 @@ class Scraper(object):
             pass
 
 
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def start_crawl(self, **kwds):
     """ This task starts the crawler; it shoudl be the parent task for others,
@@ -145,13 +142,7 @@ def start_crawl(self, **kwds):
     Scraper(**kwds)()
 
 
-@shared_task(bind=True)
-def crawl_callback(self, corpusid):
-
-    pass
-
-
-@shared_task(bind=True)
+@celery.task(bind=True)
 @save_task_id
 def crawl_links(self, links, **kwds):
 

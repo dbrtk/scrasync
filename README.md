@@ -25,7 +25,7 @@ The parameters required by the Scraper:
 * endpoint - a valid URL;
 * depth - crawler's depth;
 * corpusid - the id of the corpus (these are defined within rmxbot);
-* corpus_file_path - the path where files are stored on the remote or local machine.
+* target_path - the path where files are stored on the remote or local machine.
 
 The parameters corpusid and corpus_file_path are specific to rmxbot.
 
