@@ -1,6 +1,5 @@
-import hashlib
+
 import os
-import uuid
 
 from celery.result import AsyncResult
 
