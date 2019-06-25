@@ -63,6 +63,9 @@ def crawl_ready(corpusid):
         res = AsyncResult(_id, app=celery)
         is_ready = res.ready()
 
+        # todo(): retry PENDING tasks
+        # todo(): set max_retry to 3
+
         if is_ready:
             list_lrem(key, _id)
         else:
