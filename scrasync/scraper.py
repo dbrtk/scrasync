@@ -124,16 +124,11 @@ class Scraper(object):
         self.endpoint_list = [
             _[2] for _ in self.head() if check_content_type(_[0])]
 
-    def scrape(self):
-
-        for web_page in self.get():
-            pass
-
 
 @celery.task(bind=True)
 @save_task_id
 def start_crawl(self, **kwds):
-    """ This task starts the crawler; it shoudl be the parent task for others,
+    """ This task starts the crawler; it should be the parent task for others,
         that will follow.
     """
     endpoint = kwds.get('endpoint')

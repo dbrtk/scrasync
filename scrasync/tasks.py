@@ -17,6 +17,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
     """ Calling the html parser and saving the data to file. """
 
     if not os.path.isfile(path):
+        raise ValueError(path)
         return []
 
     with open(path, 'r') as html_txt:
