@@ -27,7 +27,7 @@ RMXBOT_TASKS = {
 
     'create_data': 'rmxbot.tasks.data.create_from_webpage',
 
-    'file_extract_callback': 'rmxbot.tasks.corpus.file_extract_callback',
+    'file_extract_callback': 'rmxbot.tasks.container.file_extract_callback',
 
 }
 EXTRACTXT_TASKS = {
