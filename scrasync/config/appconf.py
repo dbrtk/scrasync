@@ -18,7 +18,7 @@ HTTP_TIMEOUT = 10
 TEXT_C_TYPES = ['text/plain', 'text/html']
 
 
-# the maximal amount of pages per crawl/corpus
+# the maximal amount of pages per crawl/container
 CORPUS_MAX_PAGES = 500
 
 # AIOHTTP CONFIG
