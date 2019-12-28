@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8
 
 # Creating a user tu run the process
 RUN groupadd -r scrasyncuser && useradd -r -g scrasyncuser scrasyncuser
