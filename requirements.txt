@@ -4,3 +4,5 @@ pytest
 
 celery
 redis
+
+pika

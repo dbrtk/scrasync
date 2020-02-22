@@ -19,7 +19,7 @@ TEXT_C_TYPES = ['text/plain', 'text/html']
 
 
 # the maximal amount of pages per crawl/container
-CORPUS_MAX_PAGES = 500
+CRAWL_MAX_PAGES = 500
 
 # AIOHTTP CONFIG
 AIOHTTP_MAX_URLS = 25

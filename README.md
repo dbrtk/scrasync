@@ -36,4 +36,4 @@ The following variables in the config (https://github.com/dbrtk/scrasync/blob/ma
 * PROXIMITY_USER- - the username on the server that contains rmxbot (used by rsync/ssh);
 * HTTP_TIMEOUT - the timeout set on aiohttp' http getter;
 
-Other config variables are of interest, i.e. CORPUS_MAX_PAGES, AIOHTTP_MAX_URLS. 
+Other config variables are of interest, i.e. CRAWL_MAX_PAGES, AIOHTTP_MAX_URLS.

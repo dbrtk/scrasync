@@ -5,8 +5,8 @@ import re
 
 from .app import celery
 from .async_http import run, run_with_tmp
-from .backend import scrape_set, scrape_get
-from scrasync.config.appconf import CORPUS_MAX_PAGES, TEXT_C_TYPES
+from .backend import scrape_get, scrape_set
+from scrasync.config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
@@ -107,7 +107,7 @@ class Scraper(object):
             }
 
             if self.current_depth < self.max_depth and \
-               self.pages_count <= CORPUS_MAX_PAGES:
+               self.pages_count <= CRAWL_MAX_PAGES:
 
                 parameters['link'] = crawl_links.s(
                     corpusid=self.corpusid,
@@ -125,9 +125,9 @@ class Scraper(object):
             _[2] for _ in self.head() if check_content_type(_[0])]
 
 
-@celery.task(bind=True)
+@celery.task
 @save_task_id
-def start_crawl(self, **kwds):
+def start_crawl(**kwds):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
     """
@@ -137,9 +137,9 @@ def start_crawl(self, **kwds):
     Scraper(**kwds)()
 
 
-@celery.task(bind=True)
+@celery.task
 @save_task_id
-def crawl_links(self, links, **kwds):
+def crawl_links(links, **kwds):
 
     kwds['endpoint'] = links
     Scraper(**kwds)()
