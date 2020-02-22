@@ -1,9 +1,6 @@
 
 from .appconf import BROKER_HOST_NAME
 
-# BROKER_URL = 'redis://{}:6379/0'.format(BROKER_HOST_NAME)
-# CELERY_RESULT_BACKEND = 'redis://{}:6379/0'.format(BROKER_HOST_NAME)
-
 BROKER_URL = f"amqp://rmxuser:rmxpass@{BROKER_HOST_NAME}:5672/rmxvhost"
 CELERY_RESULT_BACKEND = 'rpc://'
 
@@ -32,9 +29,5 @@ RMXBOT_TASKS = {
 
     'file_extract_callback': 'rmxbot.tasks.container.file_extract_callback',
 
-}
-EXTRACTXT_TASKS = {
-
-    'extract_from_txt': 'extractxt.tasks.extract_from_txt',
 }
 
