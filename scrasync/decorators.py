@@ -9,7 +9,7 @@ def save_task_id(func):
     """ this decorator saves the id of each task in the database; these are
     retrieved in order to check if all tasks accomplished and finished.
 
-    all task should have a corpus id in the key-word parameters, this shoudl be
+    all task should have a corpus id in the key-word parameters, this should be
     called corpusid.
 
     """

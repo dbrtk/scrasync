@@ -125,9 +125,9 @@ class Scraper(object):
             _[2] for _ in self.head() if check_content_type(_[0])]
 
 
-@celery.task
+@celery.task(bind=True)
 @save_task_id
-def start_crawl(**kwds):
+def start_crawl(self, **kwds):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
     """
@@ -137,9 +137,9 @@ def start_crawl(**kwds):
     Scraper(**kwds)()
 
 
-@celery.task
+@celery.task(bind=True)
 @save_task_id
-def crawl_links(links, **kwds):
+def crawl_links(self, links, **kwds):
 
     kwds['endpoint'] = links
     Scraper(**kwds)()
