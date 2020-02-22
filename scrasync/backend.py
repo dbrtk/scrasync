@@ -3,7 +3,7 @@ import hashlib
 
 import redis
 
-from scrasync.config.appconf import REDIS_HOST_NAME, REDIS_EXPIRATION_TIME
+from scrasync.config.appconf import REDIS_EXPIRATION_TIME, REDIS_HOST_NAME
 
 REDIS_DB = redis.StrictRedis(
     host=REDIS_HOST_NAME, port=6379, db=0, charset="utf-8",

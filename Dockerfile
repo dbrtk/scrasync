@@ -9,7 +9,8 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# the redis host
+# rabbitmq and redis hosts
+ENV BROKER_HOST_NAME 'rabbitmq'
 ENV REDIS_HOST_NAME 'redis'
 
 RUN chmod +x /app/celery.sh

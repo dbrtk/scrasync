@@ -27,6 +27,7 @@ AIOHTTP_MAX_URLS = 25
 
 # REDIS CONFIG
 # redis db host
+BROKER_HOST_NAME = os.environ.get('BROKER_HOST_NAME')
 REDIS_HOST_NAME = os.environ.get('REDIS_HOST_NAME')
 
 
