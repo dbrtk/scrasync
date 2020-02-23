@@ -10,8 +10,8 @@ WORKDIR /app
 COPY . /app
 
 # rabbitmq and redis hosts
-ENV BROKER_HOST_NAME 'rabbitmq'
-ENV REDIS_HOST_NAME 'redis'
+ENV BROKER_HOST_NAME 'message_broker'
+ENV REDIS_HOST_NAME 'message_broker'
 
 RUN chmod +x /app/celery.sh
 
