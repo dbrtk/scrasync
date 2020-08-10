@@ -37,3 +37,9 @@ REDIS_EXPIRATION_TIME = 60 * 60
 
 # the size of the buffer for reading responses streamed by aiohttp.
 AIOHTTP_BUFSIZE = 8 * 1024
+
+
+# celery, redis (auth access) configuration
+REDIS_PASS = os.environ.get('REDIS_PASS')
+REDIS_DB_NUMBER = 0
+REDIS_PORT = 6379

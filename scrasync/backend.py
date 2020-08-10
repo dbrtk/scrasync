@@ -3,7 +3,8 @@ import hashlib
 
 import redis
 
-from scrasync.config.appconf import BROKER_HOST_NAME, REDIS_EXPIRATION_TIME
+from .config.appconf import (BROKER_HOST_NAME, REDIS_EXPIRATION_TIME,
+                             REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT)
 
 REDIS_DB = None
 
@@ -16,8 +17,9 @@ def redis_conn():
 
         REDIS_DB = redis.StrictRedis(
             host=BROKER_HOST_NAME,
-            port=6379,
-            db=0,
+            port=REDIS_PORT,
+            password=REDIS_PASS,
+            db=REDIS_DB_NUMBER,
             charset="utf-8",
             decode_responses=True)
 

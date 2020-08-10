@@ -49,8 +49,8 @@ def test_task(a, b):
     return int(a) + int(b)
 
 
-@celery.task
-def crawl_ready(corpusid):
+@celery.task(bind=True)
+def crawl_ready(self, corpusid):
     """Check if the crawl is ready."""
     key = task_ids_key(corpusid)
     task_ids = list_lrange(key)
