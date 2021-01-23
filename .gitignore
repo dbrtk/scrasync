@@ -10,4 +10,4 @@ rmxbot.egg-*
 **/*.png
 
 scrasync.egg-info
-.pytest_cache
+

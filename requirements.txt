@@ -1,6 +1,5 @@
 aiohttp
 chardet
-pytest
 
 celery
 redis
