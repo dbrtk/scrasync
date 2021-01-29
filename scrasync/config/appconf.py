@@ -59,10 +59,10 @@ RPC_VHOST = os.environ.get('RABBITMQ_DEFAULT_VHOST')
 RPC_HOST = os.environ.get('RABBITMQ_HOST')
 RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
 
-# mongodb celery backend
-DATABASE_USERNAME = os.environ.get('DATABASE_USERNAME')
-DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
-MONGO_PORT = os.environ.get('MONGO_PORT')
+# configurations for mongodb crawl status
+MONGO_RPC_DATABASE = os.environ.get('MONGO_RPC_DATABASE')
+MONGO_RPC_COLLECTION = os.environ.get('MONGO_RPC_COLLECTION')
+MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
+MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
 MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
-RPC_DATABASE = os.environ.get('RPC_DATABASE')
-RPC_COLLECTION = os.environ.get('RPC_COLLECTION')
+

@@ -1,7 +1,7 @@
 
 import hashlib
 
-import redis
+#import redis
 
 from .config.appconf import (BROKER_HOST_NAME, REDIS_EXPIRATION_TIME,
                              REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT)
@@ -13,39 +13,44 @@ def redis_conn():
 
     global REDIS_DB
 
-    if not isinstance(REDIS_DB, redis.client.Redis):
+    #if not isinstance(REDIS_DB, redis.client.Redis):
 
-        REDIS_DB = redis.StrictRedis(
-            host=BROKER_HOST_NAME,
-            port=REDIS_PORT,
-            password=REDIS_PASS,
-            db=REDIS_DB_NUMBER,
-            charset="utf-8",
-            decode_responses=True)
+        #REDIS_DB = redis.StrictRedis(
+            #host=BROKER_HOST_NAME,
+            #port=REDIS_PORT,
+            #password=REDIS_PASS,
+            #db=REDIS_DB_NUMBER,
+            #charset="utf-8",
+            #decode_responses=True)
 
     return REDIS_DB
 
 
 def scrape_get(*args, key: str = None):
-
+    
+    # todo(): delete - it is replaced
     if args and not key:
         key = make_key(*args)
 
     return redis_conn().get(key)
 
 
-def scrape_set_unique(*args, data: (list, str) = None):
+#def scrape_set_unique(*args, data: (list, str) = None):
 
-    conn = redis_conn()
-    key = make_key(*args)
-    if conn.exists(key):
-        return None
-    conn.set(key, data)
-    conn.expire(key, REDIS_EXPIRATION_TIME)
-    return key
+    ## todo(): delete - it is not in use.
+
+    #conn = redis_conn()
+    #key = make_key(*args)
+    #if conn.exists(key):
+        #return None
+    #conn.set(key, data)
+    #conn.expire(key, REDIS_EXPIRATION_TIME)
+    #return key
 
 
 def scrape_set(*args, data: (list, str) = None, key: str = None):
+
+    # todo(): delete - it is replaced
 
     conn = redis_conn()
     if args and not key:
@@ -70,14 +75,16 @@ def make_key(*args):
     return m.hexdigest()
 
 
-def key_exists(*args, key):
+#def key_exists(*args, key):
 
-    if args and not key:
-        key = make_key(*args)
-    return redis_conn().exists(key)
+    ## todo(): delete - it is not used
+    #if args and not key:
+        #key = make_key(*args)
+    #return redis_conn().exists(key)
 
 
 def list_lpush(*args, key: str = None, value: str = None):
+    """ Pushing an item to the list with task ids. """
 
     if args and not key:
         key = make_key(*args)
@@ -85,7 +92,7 @@ def list_lpush(*args, key: str = None, value: str = None):
 
 
 def list_lrange(key, _from=0, _to=-1):
-    """ Retrieves the entire list. """
+    """ Retrieves the entire list with task ids. """
 
     return redis_conn().lrange(key, _from, _to)
 
@@ -99,3 +106,4 @@ def list_lrem(key, value):
 def task_ids_key(corpus_id):
 
     return '{}_{}'.format(corpus_id, 'taskids')
+

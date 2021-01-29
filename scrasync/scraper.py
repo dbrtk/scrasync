@@ -5,8 +5,12 @@ import re
 
 from .app import celery
 from .async_http import run, run_with_tmp
-from .backend import scrape_get, scrape_set
-from scrasync.config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
+
+# todo(): delete backend imports
+# from .backend import scrape_get, scrape_set
+
+from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
+from . import crawl_state
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
@@ -54,17 +58,27 @@ class Scraper(object):
         """ Getting rid of duplicated url(s). This method monitors endpoints
         sent to the scraper.
         """
+        
         key = '_'.join([self.corpusid, 'endpoint'])
-        saved_endpoint = scrape_get(key=key)
+        # saved_endpoint = scrape_get(key=key)
+        # saved_endpoint = crawl_state.get_state(key=key)
+        
+        saved_endpoint = crawl_state.get_saved_endpoints(self.corpusid)
+        print(f'endpoint list: {self.endpoint_list}', flush=True)
 
         if saved_endpoint:
-            saved_endpoint = json.loads(saved_endpoint)
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
-            scrape_set(key=key, data=json.dumps(
-                self.endpoint_list + saved_endpoint))
-        else:
-            scrape_set(key=key, data=json.dumps(self.endpoint_list))
+        crawl_state.push_many(
+            containerid=self.corpusid, urls=self.endpoint_list)
+            #crawl_state.set_state(key=key, data=
+                #self.endpoint_list + saved_endpoint)
+            #scrape_set(key=key, data=json.dumps(
+                #self.endpoint_list + saved_endpoint))
+        #else:
+            #crawl_state.set_state(key=key, data=self.endpoint_list)
+            #scrape_set(key=key, data=json.dumps(self.endpoint_list))
+        
 
     def validated_urls(self, endpoint_list):
 
