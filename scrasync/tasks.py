@@ -1,6 +1,7 @@
-
+import json
 import os
 
+import celery
 from celery.result import AsyncResult
 
 from .app import celery
@@ -67,17 +68,25 @@ def crawl_ready(self, containerid):
     count = 0
 
     ready_tasks = []
+    print(f'\ninside crawl_ready with containerid: {containerid}; {type(containerid)}', flush=True)
     for taskobj in crawl_state.retrieve_taskids(containerid=containerid):
 
         res = AsyncResult(taskobj.get('taskid'), app=celery)
-        # print(f'AsyncResult dir: {dir(res)}', flush=True)
+
+        print(f'\nAsyncResult dir: {type(res)}', flush=True)
+
+        print(f'\nres dir: {dir(res)}', flush=True)
+        print(f'\nres status: {res.status}', flush=True)
+        print(f'\ncelery version: {celery.__version__}', flush=True)
+
         is_ready = res.ready()
         if is_ready:
-            ready_tasks.append(taskobj.get('_id'))
+            ready_tasks.append(str(taskobj.get('_id')))
         else:
             not_ready.append(taskobj.get('taskid'))
             count += 1
         if res.failed() or not res.ready():
+            print(f'\nresult: type({res.result}); res status: {res.status}', flush=True)
             exceptions.append({
                 'ready': is_ready,
                 'successful': res.successful(),

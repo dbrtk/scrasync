@@ -65,4 +65,5 @@ MONGO_RPC_COLLECTION = os.environ.get('MONGO_RPC_COLLECTION')
 MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
 MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
 MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
+MONGO_PORT = os.environ.get('MONGO_PORT')
 
