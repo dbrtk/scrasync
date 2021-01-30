@@ -4,3 +4,5 @@ chardet
 celery
 redis
 pymongo
+
+prometheus_client
