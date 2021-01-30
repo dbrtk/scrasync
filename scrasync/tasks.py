@@ -68,16 +68,10 @@ def crawl_ready(self, containerid):
     count = 0
 
     ready_tasks = []
-    print(f'\ninside crawl_ready with containerid: {containerid}; {type(containerid)}', flush=True)
+
     for taskobj in crawl_state.retrieve_taskids(containerid=containerid):
 
         res = AsyncResult(taskobj.get('taskid'), app=celery)
-
-        print(f'\nAsyncResult dir: {type(res)}', flush=True)
-
-        print(f'\nres dir: {dir(res)}', flush=True)
-        print(f'\nres status: {res.status}', flush=True)
-        print(f'\ncelery version: {celery.__version__}', flush=True)
 
         is_ready = res.ready()
         if is_ready:
@@ -86,7 +80,7 @@ def crawl_ready(self, containerid):
             not_ready.append(taskobj.get('taskid'))
             count += 1
         if res.failed() or not res.ready():
-            print(f'\nresult: type({res.result}); res status: {res.status}', flush=True)
+
             exceptions.append({
                 'ready': is_ready,
                 'successful': res.successful(),
@@ -95,12 +89,10 @@ def crawl_ready(self, containerid):
                 'status': res.status,
                 'id': res.id
             })
-    print(f'\nnot ready: {not_ready}', flush=True)
-    print(f'\nexceptions: {exceptions}', flush=True)
-    print(f'\nready_tasks: {ready_tasks}', flush=True)
+
     if ready_tasks:
         resp = crawl_state.remove_ready_tasks(docids=ready_tasks)
-        print(f'\nremove resp: {resp}')
+
     if not_ready:
         return {
             'ready': False, 
@@ -108,6 +100,7 @@ def crawl_ready(self, containerid):
             'count': count,
             'exceptions': exceptions 
         }
+    crawl_state.prune_all(containerid=containerid)
     return { 'ready': True, 'exceptions': exceptions }
 
 

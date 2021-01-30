@@ -7,24 +7,20 @@ from .appconf import (
     MONGO_RPC_PASS, MONGO_RPC_USER
 )
 
+from .appconf import BROKER_HOST_NAME, REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT
+
 # broker_url = 'amqp://myuser:mypassword@localhost:5672/myvhost'
 _url = f'amqp://{RPC_USER}:{RPC_PASS}@{RPC_HOST}:{RPC_PORT}/{RPC_VHOST}'
-
 
 broker_url = _url
 
 # result_backend = 'rpc://'
 result_persistent = True
 
-# 'mongodb://username:password@r1.example.net:27017/?authSource=admin'
-result_backend = f'mongodb://{MONGO_RPC_USER}:{MONGO_RPC_PASS}@{MONGODB_LOCATION}:{MONGO_PORT}/{MONGO_RPC_DATABASE}?authSource={MONGO_RPC_DATABASE}'
+result_backend = f'redis://:{REDIS_PASS}@{BROKER_HOST_NAME}:{REDIS_PORT}/{REDIS_DB_NUMBER}'
 
-#mongodb_backend_settings = {
-    #'mongo_host': MONGODB_LOCATION,
-    #'user': MONGO_RPC_USER,
-    #'password': MONGO_RPC_PASS,
-    #'database': MONGO_RPC_DATABASE
-#}
+# 'mongodb://username:password@r1.example.net:27017/?authSource=admin'
+#result_backend = f'mongodb://{MONGO_RPC_USER}:{MONGO_RPC_PASS}@{MONGODB_LOCATION}:{MONGO_PORT}/{MONGO_RPC_DATABASE}?authSource={MONGO_RPC_DATABASE}'
 
 imports = ('scrasync.tasks', 'scrasync.scraper', )
 
@@ -33,9 +29,9 @@ timezone = 'UTC'
 
 accept_content = ['json', 'msgpack', 'yaml', 'pickle']
 
-task_serializer = 'pickle'
+task_serializer = 'json'
 
-result_serializer = 'pickle'
+result_serializer = 'json'
 
 task_routes = {
 

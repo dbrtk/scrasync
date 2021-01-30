@@ -2,4 +2,5 @@ aiohttp
 chardet
 
 celery
+redis
 pymongo
