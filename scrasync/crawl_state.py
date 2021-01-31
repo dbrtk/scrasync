@@ -51,30 +51,30 @@ class RecordType(enum.Enum):
 class CrawlState:
 
     structure = {
+        'crawlid': str,
         'containerid': bson.ObjectId,
         'url': str,
         'urlid': str,
         'ready': bool,
-        'leafs': [bson.ObjectId],
         '_type': str
     }
-    def __init__(self, containerid, url):
+    def __init__(self, containerid, url, crawlid: str = None):
 
+        self.crawlid = crawlid
         self.containerid = str(containerid)
         self.url = url
         self.urlid = make_key(url)
         self.ready = False
-        self.leafs = []
         self._type = RecordType.state.value
 
     def __call__(self):
 
         return {
+            'crawlid': self.crawlid,
             'containerid': self.containerid,
             'url': self.url,
             'urlid': self.urlid,
             'ready': self.ready,
-            'leafs': self.leafs,
             '_type': self._type
         }
 
@@ -120,6 +120,15 @@ def make_key(*args):
     return hasher.hexdigest()
 
 
+def make_crawlid(containerid: str = None, seed: str = None):
+    """ It calls the make_key function. The goal is to keep the ordering of
+        arguments passed to make_key consistent.
+
+        The 'seed' is the argument that contains the endpoint that starts the
+        crawler - the seed.
+    """
+    return make_key(containerid, seed)
+
 
 # below are functions that handle state per document/webpage being scraped
 
@@ -155,12 +164,6 @@ def push_many(containerid: str = None, urls: list = None):
     return coll.insert_many([
         CrawlState(containerid=containerid, url=url)() for url in urls
     ])
-
-
-#@state_args
-#def update_leafs(containerid: (bson.ObjectId, str) = None, urls: list = None):
-
-    #pass
 
 
 #@state_args

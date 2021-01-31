@@ -28,9 +28,13 @@ class Scraper(object):
 
     def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
                  current_depth: int = 0, pages_count: int = 0,
-                 target_path: str = None):
+                 target_path: str = None, crawlid: str = None):
         """ The initialisation of the scraper. """
 
+        self.crawlid = crawlid if crawlid \
+            else self.crawl_state.make_crawlid(
+                containerid=containerid, seed=endpoint
+            )
         self.endpoint_list = process_links(
             list(set(self.validated_urls(endpoint)))
         )
@@ -59,7 +63,7 @@ class Scraper(object):
         sent to the scraper.
         """
         
-        key = '_'.join([self.corpusid, 'endpoint'])
+        # key = '_'.join([self.corpusid, 'endpoint'])
         # saved_endpoint = scrape_get(key=key)
         # saved_endpoint = crawl_state.get_state(key=key)
         
@@ -125,6 +129,7 @@ class Scraper(object):
 
                 parameters['link'] = crawl_links.s(
                     corpusid=self.corpusid,
+                    crawlid=self.crawlid,
                     current_depth=self.current_depth,
                     pages_count=self.pages_count,
                     depth=self.max_depth
