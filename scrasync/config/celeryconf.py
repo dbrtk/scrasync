@@ -2,11 +2,6 @@
 # rabbitmq related imports
 from .appconf import RPC_HOST, RPC_PASS, RPC_PORT, RPC_USER, RPC_VHOST
 
-#from .appconf import (
-    #MONGODB_LOCATION, MONGO_PORT, MONGO_RPC_DATABASE, MONGO_RPC_PASS,
-    #MONGO_RPC_USER
-#)
-
 from .appconf import BROKER_HOST_NAME, REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT
 
 # broker_url = 'amqp://myuser:mypassword@localhost:5672/myvhost'
@@ -17,9 +12,6 @@ broker_url = _url
 result_persistent = True
 
 result_backend = f'redis://:{REDIS_PASS}@{BROKER_HOST_NAME}:{REDIS_PORT}/{REDIS_DB_NUMBER}'
-
-# 'mongodb://username:password@r1.example.net:27017/?authSource=admin'
-#result_backend = f'mongodb://{MONGO_RPC_USER}:{MONGO_RPC_PASS}@{MONGODB_LOCATION}:{MONGO_PORT}/{MONGO_RPC_DATABASE}?authSource={MONGO_RPC_DATABASE}'
 
 imports = ('scrasync.tasks', 'scrasync.scraper', )
 
