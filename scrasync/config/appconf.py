@@ -61,7 +61,9 @@ RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
 
 # configurations for mongodb crawl status
 MONGO_RPC_DATABASE = os.environ.get('MONGO_RPC_DATABASE')
-MONGO_RPC_COLLECTION = os.environ.get('MONGO_RPC_COLLECTION')
+MONGO_CRAWL_STATE_COLL = os.environ.get('MONGO_CRAWL_STATE_COLL')
+MONGO_CRAWL_RESULTS_COLL = os.environ.get('MONGO_CRAWL_RESULTS_COLL')
+
 MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
 MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
 MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')

@@ -5,6 +5,7 @@ import re
 
 from .app import celery
 from .async_http import run, run_with_tmp
+import pymongo
 
 # todo(): delete backend imports
 # from .backend import scrape_get, scrape_set
@@ -32,8 +33,9 @@ class Scraper(object):
         """ The initialisation of the scraper. """
 
         self.crawlid = crawlid if crawlid \
-            else self.crawl_state.make_crawlid(
-                containerid=containerid, seed=endpoint
+            else crawl_state.make_crawlid(
+                containerid=corpusid,
+                seed=endpoint
             )
         self.endpoint_list = process_links(
             list(set(self.validated_urls(endpoint)))
@@ -73,8 +75,20 @@ class Scraper(object):
         if saved_endpoint:
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
-        crawl_state.push_many(
-            containerid=self.corpusid, urls=self.endpoint_list)
+        try:
+            print(f'\nClass variables: {self.__dict__}', flush=True)
+
+            resp = crawl_state.push_many(
+                containerid=self.corpusid,
+                urls=self.endpoint_list,
+                crawlid=self.crawlid
+            )
+
+        except pymongo.errors.DuplicateKeyError as err:
+            print(err, flush=True)
+
+        print('\nInserting many endpoints to the database..............', flush=True)
+        print(f'\nMongoDB insert response: {resp}', flush=True)
             #crawl_state.set_state(key=key, data=
                 #self.endpoint_list + saved_endpoint)
             #scrape_set(key=key, data=json.dumps(

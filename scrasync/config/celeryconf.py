@@ -2,10 +2,10 @@
 # rabbitmq related imports
 from .appconf import RPC_HOST, RPC_PASS, RPC_PORT, RPC_USER, RPC_VHOST
 
-from .appconf import (
-    MONGODB_LOCATION, MONGO_PORT, MONGO_RPC_COLLECTION, MONGO_RPC_DATABASE,
-    MONGO_RPC_PASS, MONGO_RPC_USER
-)
+#from .appconf import (
+    #MONGODB_LOCATION, MONGO_PORT, MONGO_RPC_DATABASE, MONGO_RPC_PASS,
+    #MONGO_RPC_USER
+#)
 
 from .appconf import BROKER_HOST_NAME, REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT
 
@@ -14,7 +14,6 @@ _url = f'amqp://{RPC_USER}:{RPC_PASS}@{RPC_HOST}:{RPC_PORT}/{RPC_VHOST}'
 
 broker_url = _url
 
-# result_backend = 'rpc://'
 result_persistent = True
 
 result_backend = f'redis://:{REDIS_PASS}@{BROKER_HOST_NAME}:{REDIS_PORT}/{REDIS_DB_NUMBER}'

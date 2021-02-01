@@ -1,5 +1,6 @@
 """ The module getting the database connection, the database and the collection.
 """
+import datetime
 import enum
 import hashlib
 
@@ -7,8 +8,8 @@ import bson
 from pymongo import MongoClient
 
 from .config.appconf import (
-    MONGODB_LOCATION, MONGO_RPC_COLLECTION, MONGO_RPC_DATABASE, MONGO_RPC_PASS,
-    MONGO_RPC_USER
+    MONGO_CRAWL_RESULTS_COLL, MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION,
+    MONGO_RPC_DATABASE, MONGO_RPC_PASS, MONGO_RPC_USER
 )
 from .decorators import state_args
 
@@ -36,7 +37,7 @@ def get_connection(db: str = MONGO_RPC_DATABASE, collection: str = None):
     return database, collection
 
 
-def get_collection(collection: str = MONGO_RPC_COLLECTION):
+def get_collection(collection: str = None):
     """ returns an instance of the mongodb collection """
     conn = get_connection(collection=collection)
     return conn[1]
@@ -56,16 +57,18 @@ class CrawlState:
         'url': str,
         'urlid': str,
         'ready': bool,
-        '_type': str
+        '_type': str,
+        'created': datetime.datetime
     }
     def __init__(self, containerid, url, crawlid: str = None):
 
         self.crawlid = crawlid
-        self.containerid = str(containerid)
+        self.containerid = bson.ObjectId(containerid)
         self.url = url
         self.urlid = make_key(url)
         self.ready = False
         self._type = RecordType.state.value
+        self.created = datetime.datetime.now()
 
     def __call__(self):
 
@@ -75,7 +78,8 @@ class CrawlState:
             'url': self.url,
             'urlid': self.urlid,
             'ready': self.ready,
-            '_type': self._type
+            '_type': self._type,
+            'created': self.created
         }
 
 
@@ -83,7 +87,8 @@ class TaskId:
     structure = {
         'containerid': str,
         'taskid': str,
-        '_type': str
+        '_type': str,
+        'created': datetime.datetime
     }
 
     def __init__(self, containerid, taskid):
@@ -91,13 +96,15 @@ class TaskId:
         self.containerid = containerid
         self.taskid = taskid
         self._type = RecordType.taskid.value
+        self.created = datetime.datetime.now()
 
     def __call__(self):
 
         return {
             'containerid': self.containerid,
             '_type': self._type,
-            'taskid': self.taskid
+            'taskid': self.taskid,
+            'created': self.created
         }
 
 
@@ -120,14 +127,15 @@ def make_key(*args):
     return hasher.hexdigest()
 
 
-def make_crawlid(containerid: str = None, seed: str = None):
+def make_crawlid(containerid: str = None, seed: (list, str) = None):
     """ It calls the make_key function. The goal is to keep the ordering of
         arguments passed to make_key consistent.
 
         The 'seed' is the argument that contains the endpoint that starts the
         crawler - the seed.
     """
-    return make_key(containerid, seed)
+    seed = seed if isinstance(seed, list) else [seed]
+    return make_key(containerid, *seed)
 
 
 # below are functions that handle state per document/webpage being scraped
@@ -158,12 +166,19 @@ class DuplicateEndpointError(Exception):
 
 
 @state_args
-def push_many(containerid: str = None, urls: list = None):
+def push_many(containerid: str = None, urls: list = None, crawlid: str = None):
+    print(f'inside push_many: containerid: {containerid}; urls: {urls}: crawlid: {crawlid}', flush=True)
+    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
+    out = []
+    for url in urls:
+        out.append(CrawlState(containerid=containerid, url=url, crawlid=crawlid)())
+    print(out, flush=True)
 
-    coll = get_collection()
-    return coll.insert_many([
-        CrawlState(containerid=containerid, url=url)() for url in urls
-    ])
+    #return coll.insert_many([
+        #CrawlState(containerid=containerid, url=url, crawlid=crawlid)()
+        #for url in urls
+    #], ordered=False)
+    return coll.insert_many(out, ordered=False)
 
 
 #@state_args
@@ -198,7 +213,7 @@ def state_list(containerid: (str, bson.ObjectId) = None):
     """ For a containerid, retrieve all documents. This shows all active 
         processes (scraping, html cleanup, writng to disk).
     """
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
 
     return coll.find({
         'containerid': containerid,
@@ -209,7 +224,7 @@ def state_list(containerid: (str, bson.ObjectId) = None):
 @state_args
 def list_ready_false(containerid: str = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
     return coll.find({
         'containerid': containerid, 
         'ready': False,
@@ -220,7 +235,7 @@ def list_ready_false(containerid: str = None):
 @state_args
 def list_ready_true(containerid: str = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
     return coll.find({
         'containerid': containerid, 
         'ready': True,
@@ -231,7 +246,7 @@ def list_ready_true(containerid: str = None):
 @state_args
 def set_ready_state_true(containerid: str = None, url: str = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
     return coll.update_many({
             'containerid': containerid, 
             'url': url
@@ -263,18 +278,20 @@ def get_saved_endpoints(containerid: (str, bson.ObjectId) = None):
 
 
 # todo(): delete all the functions below
+# these are related to the monitoring of celery tasks with AsyncResult.
+# once this functionality is migrated to prometheus, they won't be needed.
 
 @state_args
 def push_taskid(containerid: (str, bson.ObjectId) = None, taskid: str = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.insert_one(TaskId(containerid=containerid, taskid=taskid)())
 
 
 @state_args
 def retrieve_taskids(containerid: (str, bson.ObjectId) = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.find({
         '_type': RecordType.taskid.value,
         'containerid': containerid
@@ -290,7 +307,7 @@ def get_taskids(containerid: (str, bson.ObjectId) = None):
 @state_args
 def prune_taskids(containerid: (str, bson.ObjectId) = None):
 
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.remove({
         '_type': RecordType.taskid.value,
         'containerid': containerid
@@ -300,12 +317,11 @@ def prune_taskids(containerid: (str, bson.ObjectId) = None):
 @state_args
 def prune_all(containerid: (str, bson.ObjectId) = None):
     
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.remove({'containerid': containerid})
 
 
 def remove_ready_tasks(docids: list = None):
     """ remove records for tasks that succeded """
-    coll = get_collection()
+    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.delete_many({'_id': {'$in': docids}})
-
