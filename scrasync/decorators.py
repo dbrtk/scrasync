@@ -4,8 +4,6 @@ from functools import wraps
 
 import bson
 
-# todo(): delete this line
-# from .backend import list_lpush, task_ids_key
 from . import crawl_state
 
 
@@ -28,9 +26,6 @@ def save_task_id(func):
 
         crawl_state.push_taskid(
             containerid=containerid, taskid=self.request.id)
-        # key = task_ids_key(containerid)
-        # list_lpush(key=key, value=self.request.id)
-
         return func(self, *args, **kwds)
 
     return wrapped
@@ -44,7 +39,6 @@ def state_args(func):
 
         containerid = kwds.get('containerid', None)
         kwds['containerid'] = bson.ObjectId(containerid)
-        
+
         return func(*args, **kwds)
     return wrapped
-

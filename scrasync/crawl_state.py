@@ -43,12 +43,6 @@ def get_collection(collection: str = None):
     return conn[1]
 
 
-class RecordType(enum.Enum):
-
-    state = 'state'
-    taskid = 'taskid'
-
-
 class CrawlState:
 
     structure = {
@@ -57,7 +51,6 @@ class CrawlState:
         'url': str,
         'urlid': str,
         'ready': bool,
-        '_type': str,
         'created': datetime.datetime
     }
     def __init__(self, containerid, url, crawlid: str = None):
@@ -67,7 +60,6 @@ class CrawlState:
         self.url = url
         self.urlid = make_key(url)
         self.ready = False
-        self._type = RecordType.state.value
         self.created = datetime.datetime.now()
 
     def __call__(self):
@@ -78,7 +70,6 @@ class CrawlState:
             'url': self.url,
             'urlid': self.urlid,
             'ready': self.ready,
-            '_type': self._type,
             'created': self.created
         }
 
@@ -87,7 +78,6 @@ class TaskId:
     structure = {
         'containerid': str,
         'taskid': str,
-        '_type': str,
         'created': datetime.datetime
     }
 
@@ -95,28 +85,15 @@ class TaskId:
 
         self.containerid = containerid
         self.taskid = taskid
-        self._type = RecordType.taskid.value
         self.created = datetime.datetime.now()
 
     def __call__(self):
 
         return {
             'containerid': self.containerid,
-            '_type': self._type,
             'taskid': self.taskid,
             'created': self.created
         }
-
-
-#def del_state(*args, key: str = None):
-    #""" Deleting the crawl state document from the database. """
-
-    ## todo(): delete this
-    #coll = get_collection()
-
-    #if args and not key:
-        #key = make_key(*args)
-    #return coll.delete_many({'key': key})
 
 
 def make_key(*args):
@@ -140,85 +117,28 @@ def make_crawlid(containerid: str = None, seed: (list, str) = None):
 
 # below are functions that handle state per document/webpage being scraped
 
-class DuplicateEndpointError(Exception):
-
-    pass
-
-
-#@state_args
-#def state_push(containerid: str = None, url: str = None, check_dupli=False):
-    #""" Create a document for a file/ webpage and push it to the state
-        #collection.
-    #"""
-
-    ## todo(): delete
-    #coll = get_collection()
-
-    #state = CrawlState(containerid=containerid, url=url)()
-    #if check_dupli:
-        #if coll.find_one({
-            #'containerid': containerid,
-            #'url': url, 
-            #'_type': RecordType.state.value
-        #}):
-            #raise DuplicateEndpointError(url)
-    #return coll.insert_one(state)
-
 
 @state_args
 def push_many(containerid: str = None, urls: list = None, crawlid: str = None):
-    print(f'inside push_many: containerid: {containerid}; urls: {urls}: crawlid: {crawlid}', flush=True)
+    """ Push many items to the crawl_state collection. """
     coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
-    out = []
-    for url in urls:
-        out.append(CrawlState(containerid=containerid, url=url, crawlid=crawlid)())
-    print(out, flush=True)
 
-    #return coll.insert_many([
-        #CrawlState(containerid=containerid, url=url, crawlid=crawlid)()
-        #for url in urls
-    #], ordered=False)
-    return coll.insert_many(out, ordered=False)
-
-
-#@state_args
-#def state_del(containerid: (str, bson.ObjectId) = None, url: str = None):
-    #""" Delete a document from the state colleciton; this happend when the doc
-        #has been saved to drive and the db.
-    #"""
-
-    ## todo(): delete
-    #coll = get_collection()
-
-    #return coll.remove({
-        #'containerid': containerid,
-        #'_type': RecordType.state.value,
-        #'url': url
-    #})
-
-
-#@state_args
-#def remove_from_state(containerid: (str, bson.ObjectId) = None):
-    
-    ## todo(): delete
-    #coll = get_collection()
-    #return coll.delete_many({
-        #'containerid': containerid, 
-        #'_type': RecordType.state.value
-    #})
+    return coll.insert_many([
+        CrawlState(containerid=containerid, url=url, crawlid=crawlid)()
+        for url in urls
+    ], ordered=False)
 
 
 @state_args
-def state_list(containerid: (str, bson.ObjectId) = None):
+def state_list(crawlid: str = None, containerid: str = None):
     """ For a containerid, retrieve all documents. This shows all active 
         processes (scraping, html cleanup, writng to disk).
     """
     coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
 
-    return coll.find({
-        'containerid': containerid,
-        '_type': RecordType.state.value
-    })
+    if containerid:
+        return coll.find({'containerid': containerid})
+    return coll.find({'crawlid': crawlid})
 
 
 @state_args
@@ -227,8 +147,7 @@ def list_ready_false(containerid: str = None):
     coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
     return coll.find({
         'containerid': containerid, 
-        'ready': False,
-        '_type': RecordType.state.value
+        'ready': False
     })
 
 
@@ -239,7 +158,6 @@ def list_ready_true(containerid: str = None):
     return coll.find({
         'containerid': containerid, 
         'ready': True,
-        '_type': RecordType.state.value
     })
 
 
@@ -255,29 +173,13 @@ def set_ready_state_true(containerid: str = None, url: str = None):
     })
 
 
-#@state_args
-#def find_dupli(containerid: str = None, url: str = None):
-    
-    ## todo(): delete
-    #coll = get_collection()
-
-    #return coll.find_one({
-        #'containerid': containerid,
-        #'_type': RecordType.state.value,
-        #'url': url
-    #})
-
-
 def get_saved_endpoints(containerid: (str, bson.ObjectId) = None):
     """ Returns alist of saved endpoints. """
-    return [_.get('url') for item in 
-            state_list(containerid=containerid)]
+    return [_.get('url') for _ in state_list(containerid=containerid)]
 
 
 
-
-
-# todo(): delete all the functions below
+# CELERY'S TASKIDS SAVED IN THE MONGO DATABASE --> STATUS CHECK
 # these are related to the monitoring of celery tasks with AsyncResult.
 # once this functionality is migrated to prometheus, they won't be needed.
 
@@ -293,7 +195,6 @@ def retrieve_taskids(containerid: (str, bson.ObjectId) = None):
 
     coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.find({
-        '_type': RecordType.taskid.value,
         'containerid': containerid
     })
 
@@ -309,7 +210,6 @@ def prune_taskids(containerid: (str, bson.ObjectId) = None):
 
     coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
     return coll.remove({
-        '_type': RecordType.taskid.value,
         'containerid': containerid
     })
 

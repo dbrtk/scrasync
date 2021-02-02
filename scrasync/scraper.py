@@ -7,9 +7,6 @@ from .app import celery
 from .async_http import run, run_with_tmp
 import pymongo
 
-# todo(): delete backend imports
-# from .backend import scrape_get, scrape_set
-
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from . import crawl_state
 from .decorators import save_task_id
@@ -64,47 +61,31 @@ class Scraper(object):
         """ Getting rid of duplicated url(s). This method monitors endpoints
         sent to the scraper.
         """
-        
-        # key = '_'.join([self.corpusid, 'endpoint'])
-        # saved_endpoint = scrape_get(key=key)
-        # saved_endpoint = crawl_state.get_state(key=key)
-        
         saved_endpoint = crawl_state.get_saved_endpoints(self.corpusid)
-        print(f'endpoint list: {self.endpoint_list}', flush=True)
 
         if saved_endpoint:
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
         try:
-            print(f'\nClass variables: {self.__dict__}', flush=True)
-
             resp = crawl_state.push_many(
                 containerid=self.corpusid,
                 urls=self.endpoint_list,
                 crawlid=self.crawlid
             )
+        except pymongo.errors.BulkWriteError as err:
 
-        except pymongo.errors.DuplicateKeyError as err:
-            print(err, flush=True)
-
-        print('\nInserting many endpoints to the database..............', flush=True)
-        print(f'\nMongoDB insert response: {resp}', flush=True)
-            #crawl_state.set_state(key=key, data=
-                #self.endpoint_list + saved_endpoint)
-            #scrape_set(key=key, data=json.dumps(
-                #self.endpoint_list + saved_endpoint))
-        #else:
-            #crawl_state.set_state(key=key, data=self.endpoint_list)
-            #scrape_set(key=key, data=json.dumps(self.endpoint_list))
-        
+            dupli_urls = [_.get('keyValue').get('url')
+                          for _ in err.details['writeErrors']]
+            self.endpoint_list = list(
+                set(self.endpoint_list) - set(dupli_urls)
+            )
 
     def validated_urls(self, endpoint_list):
-
+        """ Validating urls. """
         return [_ for _ in endpoint_list if ValidateURL()(value=_)]
 
     def head(self):
         """ For a list of endpoints, retrieves the headers. """
-
         future = asyncio.ensure_future(run(self.endpoint_list, head_only=True))
         return self.loop.run_until_complete(future)
 
@@ -112,14 +93,12 @@ class Scraper(object):
         """ For a list of endpoints (self.endpoint_list), retrieves the content,
         making http (get) queries.
         """
-
         # future = asyncio.ensure_future(run(self.endpoint_list))
         future = asyncio.ensure_future(run_with_tmp(self.endpoint_list))
         return self.loop.run_until_complete(future)
 
     def retrieve(self):
         """ Retrieving pages using the responses saved to tempfiles. """
-
         self.current_depth += 1
 
         for tmp_path, err, url in self.get():

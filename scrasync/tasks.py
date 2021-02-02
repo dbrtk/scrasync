@@ -101,7 +101,7 @@ def crawl_ready(self, containerid):
             'exceptions': exceptions 
         }
     crawl_state.prune_all(containerid=containerid)
-    return { 'ready': True, 'exceptions': exceptions }
+    return { 'ready': True, 'exceptions': exceptions, 'count': count }
 
 
 @celery.task(bind=True)
