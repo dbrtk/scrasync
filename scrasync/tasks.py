@@ -85,6 +85,9 @@ def crawl_ready(self, containerid):
                 'ready': is_ready,
                 'successful': res.successful(),
                 'failed': res.failed(),
+                # 'task_name': res.task_name,
+                # 'args': res.args,
+                # 'kwargs': res.kwargs,
                 'result': res.result,
                 'status': res.status,
                 'id': res.id
@@ -94,6 +97,7 @@ def crawl_ready(self, containerid):
         resp = crawl_state.remove_ready_tasks(docids=ready_tasks)
 
     if not_ready:
+
         return {
             'ready': False, 
             'tasks': not_ready,

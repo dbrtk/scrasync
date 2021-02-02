@@ -24,6 +24,8 @@ task_serializer = 'json'
 
 result_serializer = 'json'
 
+result_extended = True
+
 task_routes = {
 
     'scrasync.tasks.*': {'queue': 'scrasync'},
