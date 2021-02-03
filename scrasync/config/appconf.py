@@ -26,9 +26,11 @@ AIOHTTP_MAX_URLS = 25
 
 
 # REDIS CONFIG
-# redis db host
+# celery, redis (auth access) configuration
 BROKER_HOST_NAME = os.environ.get('BROKER_HOST_NAME')
-REDIS_HOST_NAME = os.environ.get('REDIS_HOST_NAME')
+REDIS_PASS = os.environ.get('REDIS_PASS')
+REDIS_DB_NUMBER = os.environ.get('REDIS_DB_NUMBER')
+REDIS_PORT = os.environ.get('REDIS_PORT')
 
 
 # the expiration time is set to one hour.
@@ -37,13 +39,6 @@ REDIS_EXPIRATION_TIME = 60 * 60
 
 # the size of the buffer for reading responses streamed by aiohttp.
 AIOHTTP_BUFSIZE = 8 * 1024
-
-
-# celery, redis (auth access) configuration
-REDIS_PASS = os.environ.get('REDIS_PASS')
-REDIS_DB_NUMBER = 0
-REDIS_PORT = 6379
-
 
 # RabbitMQ configuration
 # RabbitMQ rpc queue name

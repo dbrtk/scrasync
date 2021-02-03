@@ -9,10 +9,6 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# rabbitmq and redis hosts
-ENV BROKER_HOST_NAME 'message_broker'
-ENV REDIS_HOST_NAME 'message_broker'
-
 RUN chmod +x /app/celery.sh
 
 # Install any needed packages specified in requirements.txt

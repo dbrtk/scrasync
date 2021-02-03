@@ -11,6 +11,7 @@ broker_url = _url
 
 result_persistent = True
 
+# redis result backend
 result_backend = f'redis://:{REDIS_PASS}@{BROKER_HOST_NAME}:{REDIS_PORT}/{REDIS_DB_NUMBER}'
 
 imports = ('scrasync.tasks', 'scrasync.scraper', )
