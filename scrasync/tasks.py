@@ -85,9 +85,6 @@ def crawl_ready(self, containerid):
                 'ready': is_ready,
                 'successful': res.successful(),
                 'failed': res.failed(),
-                # 'task_name': res.task_name,
-                # 'args': res.args,
-                # 'kwargs': res.kwargs,
                 'result': res.result,
                 'status': res.status,
                 'id': res.id
