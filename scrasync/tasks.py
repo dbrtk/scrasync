@@ -57,16 +57,27 @@ def test_task(a, b):
 
 
 @celery.task(bind=True)
-def crawl_ready(self, containerid: str = None, seed: (list, str) = None):
+def crawl_ready_buff(self, containerid: str = None, seed: (list, str) = None):
 
-    
-    metrics = get_crawl_metrics(containerid=containerid)
-    
-    raise RuntimeError(containerid)
+    # this is the new implementation of crawl_ready. it uses rabbitmq and
+    #  prometheus to get the status of tasks on the level of the transport
+    #  layer.
+    return {
+        'ready': False,
+        'tasks': [],
+        'count': 10,
+        'exceptions': []
+    }
 
 
 @celery.task(bind=True)
-def crawl_ready_mongo(self, containerid):
+def test_monitor(self, containerid: str = None):
+
+    return get_crawl_metrics(containerid=containerid)
+
+
+@celery.task(bind=True)
+def crawl_ready(self, containerid):
 
     #if crawl_state.list_ready_false(containerid=containerid):
         #return { 'ready': False }
