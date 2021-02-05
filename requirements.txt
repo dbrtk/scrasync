@@ -6,3 +6,7 @@ redis
 pymongo
 
 prometheus_client
+requests
+prometheus-api-client
+
+remote_pdb

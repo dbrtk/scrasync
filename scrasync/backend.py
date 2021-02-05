@@ -8,6 +8,8 @@ from .config.appconf import (BROKER_HOST_NAME, REDIS_EXPIRATION_TIME,
 
 REDIS_DB = None
 
+# todo(): delete 
+
 
 def redis_conn():
 

@@ -53,6 +53,8 @@ RPC_VHOST = os.environ.get('RABBITMQ_DEFAULT_VHOST')
 # the host to which the rpc broker (rabbitmq) is deployed
 RPC_HOST = os.environ.get('RABBITMQ_HOST')
 RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
+RABBITMQ_METRICS_PORT = os.environ.get('RABBITMQ_METRICS_PORT')
+RABBITMQ_SCRASYNC_QUEUES_NAME = os.environ.get('RABBITMQ_SCRASYNC_QUEUES_NAME')
 
 # configurations for mongodb crawl status
 MONGO_RPC_DATABASE = os.environ.get('MONGO_RPC_DATABASE')
@@ -63,4 +65,9 @@ MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
 MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
 MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
 MONGO_PORT = os.environ.get('MONGO_PORT')
+
+# prometheus settings 
+PROMETHEUS_HOST = os.environ.get('PROMETHEUS_HOST')
+PROMETHEUS_PORT = os.environ.get('PROMETHEUS_PORT')
+PROMETHEUS_PATH = os.environ.get('PROMETHEUS_PATH')
 

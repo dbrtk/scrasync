@@ -5,7 +5,6 @@ import celery
 from celery.result import AsyncResult
 
 from .app import celery
-
 # todo(): delete backend imports - depprecated
 from .backend import list_lrange, list_lrem, task_ids_key
 
@@ -13,6 +12,7 @@ from .config.celeryconf import RMXBOT_TASKS
 from . import crawl_state
 from .data import DataToTxt
 from .decorators import save_task_id
+from .prometheus import get_crawl_metrics
 
 
 @celery.task(bind=True)
@@ -57,7 +57,16 @@ def test_task(a, b):
 
 
 @celery.task(bind=True)
-def crawl_ready(self, containerid):
+def crawl_ready(self, containerid: str = None, seed: (list, str) = None):
+
+    
+    metrics = get_crawl_metrics(containerid=containerid)
+    
+    raise RuntimeError(containerid)
+
+
+@celery.task(bind=True)
+def crawl_ready_mongo(self, containerid):
 
     #if crawl_state.list_ready_false(containerid=containerid):
         #return { 'ready': False }
