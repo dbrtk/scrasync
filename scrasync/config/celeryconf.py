@@ -32,12 +32,16 @@ task_routes = {
     #'scrasync.tasks.*': {'queue': 'scrasync'},
     #'scrasync.scraper.*': {'queue': 'scrasync'},
 
-    #'scrasync.tasks.test_task': {'queue': 'scrasync'},
-    #'scrasync.tasks.test_monitor': {'queue': 'scrasync'},
-    #'scrasync.tasks.crawl_ready': {'queue': 'scrasync'},
-    #'scrasync.tasks.crawl_ready_withredis': {'queue': 'scrasync'},
+    'scrasync.tasks.test_task': {'queue': 'scrasync'},
+    'scrasync.tasks.test_monitor': {'queue': 'scrasync'},
+    'scrasync.tasks.crawl_ready': {'queue': 'scrasync'},
+    'scrasync.tasks.crawl_ready_withredis': {'queue': 'scrasync'},
 
-    #'scrasync.scraper.start_crawl': {'queue': 'scrasync'},
+    'scrasync.scraper.start_crawl': {'queue': 'scrasync'},
+
+    'scrasync.scraper.instantiate_scraper': {'queue': 'scrasync.*'},
+    'scrasync.scraper.crawl_links': {'queue': 'scrasync.*'},
+    'scrasync.tasks.parse_and_save': {'queue': 'scrasync.*'},
 
     'rmxbot.tasks.*': {'queue': 'rmxbot'},
 
