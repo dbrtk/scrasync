@@ -14,6 +14,7 @@ from .config.appconf import (
 
 METRICS_ENDPOINT = f"http://{RPC_HOST}:{RABBITMQ_METRICS_PORT}/api/queues/{RPC_VHOST}/{RABBITMQ_SCRASYNC_QUEUE_NAME}"
 
+# prometheus metrics served by rabbitmq on the port: 15692
 PROM_ENDPOINT = f"http://{RPC_HOST}:{RABBITMQ_PROM_METRICS_PORT}/metrics"
 
 

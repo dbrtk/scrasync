@@ -15,7 +15,7 @@ from .decorators import save_task_id
 from .prometheus import get_crawl_metrics
 
 
-@celery.task(bind=True)
+@celery.task(bind=True, reply_to="scrasync")
 @save_task_id
 def parse_and_save(self, path: str = None, endpoint: str = None,
                    corpusid: str = None):

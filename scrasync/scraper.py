@@ -2,12 +2,14 @@
 import asyncio
 import json
 import re
+import uuid
 
 from .app import celery
 from .async_http import run, run_with_tmp
 import pymongo
 
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
+from .config.celeryconf import SCRASYNC_TASKS
 from . import crawl_state
 from .decorators import save_task_id
 from .misc.validate_url import ValidateURL
@@ -26,7 +28,8 @@ class Scraper(object):
 
     def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
                  current_depth: int = 0, pages_count: int = 0,
-                 target_path: str = None, crawlid: str = None):
+                 target_path: str = None, crawlid: str = None,
+                 queue: str = None):
         """ The initialisation of the scraper. """
 
         self.crawlid = crawlid if crawlid \
@@ -34,6 +37,9 @@ class Scraper(object):
                 containerid=corpusid,
                 seed=endpoint
             )
+        if not queue:
+            raise RuntimeError('The queue name is missing.')
+        self.queue = queue
         self.endpoint_list = process_links(
             list(set(self.validated_urls(endpoint)))
         )
@@ -109,7 +115,7 @@ class Scraper(object):
             self.pages_count += 1
 
             parameters = {
-
+                'queue': self.queue,
                 'kwargs': {
                     'endpoint': url,
                     'path': tmp_path,
@@ -127,8 +133,10 @@ class Scraper(object):
                     pages_count=self.pages_count,
                     depth=self.max_depth
                 )
-
-            parse_and_save.apply_async(**parameters)
+            celery.send_task(
+                SCRASYNC_TASKS['parse_and_save'], **parameters
+            )
+            # parse_and_save.apply_async(**parameters)
 
     def filter_on_ctype(self):
         """ Filtering the list of urls, based on the content type. """
@@ -137,15 +145,37 @@ class Scraper(object):
             _[2] for _ in self.head() if check_content_type(_[0])]
 
 
+def queue_name(): return f'scrasync.{uuid.uuid4().hex}'
+
+
 @celery.task(bind=True)
 @save_task_id
 def start_crawl(self, **kwds):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
     """
+    queue = queue_name()
+
+    celery.control.add_consumer(queue, reply=True)
+    kwds['queue'] = queue
+    params = { 'queue': queue, 'kwargs': kwds }
+
+    celery.send_task(SCRASYNC_TASKS['instantiate_scraper'], **params)
+    return { 'queue': queue }
+
+
+@celery.task(bind=True)
+@save_task_id
+def instantiate_scraper(self, **kwds):
+    """
+    """
+    print(f'\nInside the instantiate_scraper function.', flush=True)
+    print(f'\nkwargs: {kwds}', flush=True)
     endpoint = kwds.get('endpoint')
+
     if isinstance(endpoint, str):
         kwds['endpoint'] = [endpoint]
+
     Scraper(**kwds)()
 
 
