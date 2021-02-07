@@ -224,4 +224,6 @@ def prune_all(containerid: (str, bson.ObjectId) = None):
 def remove_ready_tasks(docids: list = None):
     """ remove records for tasks that succeded """
     coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
+    docids = docids if all(isinstance(_, bson.ObjectId) for _ in docids) else \
+        [bson.ObjectId(_) for _ in docids]
     return coll.delete_many({'_id': {'$in': docids}})

@@ -92,11 +92,9 @@ def crawl_ready(self, containerid):
 
     if ready_tasks:
         resp = crawl_state.remove_ready_tasks(docids=ready_tasks)
-
     if not_ready:
-
         return {
-            'ready': False, 
+            'ready': False,
             'tasks': not_ready,
             'count': count,
             'exceptions': exceptions 
