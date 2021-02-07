@@ -10,9 +10,9 @@ from .backend import list_lrange, list_lrem, task_ids_key
 
 from .config.celeryconf import RMXBOT_TASKS
 from . import crawl_state
+from . import crawl_metrics
 from .data import DataToTxt
 from .decorators import save_task_id
-from .prometheus import get_crawl_metrics
 
 
 @celery.task(bind=True)
@@ -73,7 +73,7 @@ def crawl_ready_buff(self, containerid: str = None, seed: (list, str) = None):
 @celery.task(bind=True)
 def test_monitor(self, containerid: str = None):
 
-    return get_crawl_metrics(containerid=containerid)
+    return crawl_metrics.get_tasks_in_queue(containerid=containerid)
 
 
 @celery.task(bind=True)

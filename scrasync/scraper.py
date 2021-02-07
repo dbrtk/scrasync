@@ -29,6 +29,11 @@ class Scraper(object):
                  target_path: str = None, crawlid: str = None):
         """ The initialisation of the scraper. """
 
+
+        # todo(): delete this after debugging and testing.
+        import time; time.sleep(5)
+
+
         self.crawlid = crawlid if crawlid \
             else crawl_state.make_crawlid(
                 containerid=corpusid,
