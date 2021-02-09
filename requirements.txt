@@ -8,6 +8,4 @@ pymongo
 prometheus_client
 requests
 
-pandas
-
 remote_pdb
