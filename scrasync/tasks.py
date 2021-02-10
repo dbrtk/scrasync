@@ -13,10 +13,11 @@ from . import crawl_state
 from . import crawl_metrics
 from .data import DataToTxt
 from .decorators import save_task_id
+from .metrics import trackprogress
 
 
 @celery.task(bind=True)
-@save_task_id
+@trackprogress(dtype='parse_and_save')
 def parse_and_save(self, path: str = None, endpoint: str = None,
                    corpusid: str = None):
     """ Calling the html parser and saving the data to file. """
@@ -73,7 +74,8 @@ def crawl_ready_buff(self, containerid: str = None, seed: (list, str) = None):
 @celery.task(bind=True)
 def test_monitor(self, containerid: str = None):
 
-    return crawl_metrics.get_tasks_in_queue(containerid=containerid)
+    # return crawl_metrics.get_tasks_in_queue(containerid=containerid)
+    return {}
 
 
 @celery.task(bind=True)

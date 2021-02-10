@@ -10,6 +10,7 @@ import pymongo
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from . import crawl_state
 from .decorators import save_task_id
+from .metrics import trackprogress
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
 
@@ -143,7 +144,7 @@ class Scraper(object):
 
 
 @celery.task(bind=True)
-@save_task_id
+@trackprogress(dtype='start_crawl')
 def start_crawl(self, **kwds):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
@@ -155,7 +156,7 @@ def start_crawl(self, **kwds):
 
 
 @celery.task(bind=True)
-@save_task_id
+@trackprogress(dtype='crawl_links')
 def crawl_links(self, links, **kwds):
 
     kwds['endpoint'] = links

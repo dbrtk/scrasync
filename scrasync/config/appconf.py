@@ -67,3 +67,7 @@ MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
 MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
 MONGO_PORT = os.environ.get('MONGO_PORT')
 
+PUSHGATEWAY_PORT = os.environ.get('PUSHGATEWAY_PORT')
+PUSHGATEWAY_HOST = os.environ.get('PUSHGATEWAY_HOST')
+PROMETHEUS_JOB = 'scrasync'
+

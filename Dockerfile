@@ -14,7 +14,7 @@ COPY . /app
 RUN chmod +x /app/celery.sh
 
 # Install any needed packages specified in requirements.txt
-RUN python -m pip install -U pip && python -m pip install /app
+RUN pip install -U pip && pip install /app
 
 RUN chown -R scrasyncuser:scrasyncgroup /app
 
