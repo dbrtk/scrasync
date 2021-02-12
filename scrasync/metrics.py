@@ -15,17 +15,30 @@ CRAWL_PROG_PREFIX = 'crawl_links'
 PARSE_PROG_PREFIX = 'parse_and_save'
 
 LAST_CALL = 'lastcall'
+SUCCESS = 'succes'
+EXCEPTION = 'exception'
+DURATION = 'time'
 
 
 def make_progress_name(dtype: str = None, containerid: str = None): 
 
-    # return f'{dtype}_{containerid}_{uuid.uuid4().hex}'
-    return f'{dtype}_{containerid}'
+    return f'{dtype}__{DURATION}_{containerid}'
 
 
 def make_lastcall_name(dtype: str = None, containerid: str = None):
 
-    return f'{dtype}_{containerid}_{LAST_CALL}'
+    return f'{dtype}__{LAST_CALL}_{containerid}'
+
+
+def make_exception_name(dtype: str = None, containerid: str = None):
+
+    return f'{dtype}__{EXCEPTION}_{containerid}'
+
+
+def make_success_name(dtype: str = None, containerid: str = None):
+
+    return f'{dtype}__{SUCCESS}_{containerid}'
+
 
 
 def trackprogress(dtype: str = None):
@@ -37,25 +50,43 @@ def trackprogress(dtype: str = None):
                              PARSE_PROG_PREFIX]
             registry = promc.CollectorRegistry()
             containerid = kwds.get('containerid') or kwds.get('corpusid')
-            prog_name = make_progress_name(dtype, containerid)
-            g = promc.Gauge(
-                prog_name, f'the progress of {dtype}', registry=registry
+
+            print(
+                f'inside the wrapper. containerid: {containerid}; dtype: {dtype}',
+                flush=True
             )
-            last = promc.Gauge(
-                make_lastcall_name(dtype, containerid),
-                f'the time in seconds of last call made to {dtype}',
-                registry=registry
-            )
-            print(f'inside the wrapper. containerid: {containerid}', flush=True)
             try:
-                with g.time():
+                gtime = promc.Gauge(
+                    make_progress_name(dtype, containerid),
+                    f'the progress of {dtype}',
+                    registry=registry
+                )
+                with gtime.time():
                     out = func(*args, **kwds)
 
+                gsuccess = promc.Gauge(
+                    make_success_name(dtype, containerid),
+                    f'time of success return on {dtype}',
+                    registry=registry
+                )
+                gsuccess.set(time.time())
             except Exception as err:
+                gexcept = promc.Gauge(
+                    make_exception_name(dtype, containerid),
+                    f'time of exception on {dtype}',
+                    registry=registry
+                )
+                gexcept.set(time.time())
                 out = None
             finally:
+                last = promc.Gauge(
+                    make_lastcall_name(dtype, containerid),
+                    f'time of the last call made to {dtype}',
+                    registry=registry
+                )
                 last.set(time.time())
-                promc.pushadd_to_gateway(
+
+                promc.push_to_gateway(
                     f'{PUSHGATEWAY_HOST}:{PUSHGATEWAY_PORT}',
                     job=PROMETHEUS_JOB,
                     registry=registry
@@ -63,4 +94,3 @@ def trackprogress(dtype: str = None):
             return out
         return wrapper
     return inner
-

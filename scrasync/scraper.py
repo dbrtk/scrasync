@@ -138,7 +138,6 @@ class Scraper(object):
 
 
 @celery.task(bind=True)
-@trackprogress(dtype='start_crawl')
 def start_crawl(self, **kwds):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
@@ -150,7 +149,6 @@ def start_crawl(self, **kwds):
 
 
 @celery.task(bind=True)
-@trackprogress(dtype='crawl_links')
 def crawl_links(self, links, **kwds):
 
     kwds['endpoint'] = links
