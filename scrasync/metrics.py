@@ -2,7 +2,6 @@
 
 from functools import wraps
 import time
-import uuid
 
 import prometheus_client as promc
 
@@ -20,7 +19,7 @@ EXCEPTION = 'exception'
 DURATION = 'time'
 
 
-def make_progress_name(dtype: str = None, containerid: str = None): 
+def make_progress_name(dtype: str = None, containerid: str = None):
 
     return f'{dtype}__{DURATION}_{containerid}'
 
@@ -70,7 +69,7 @@ def trackprogress(dtype: str = None):
                     registry=registry
                 )
                 gsuccess.set(time.time())
-            except Exception as err:
+            except Exception as _:
                 gexcept = promc.Gauge(
                     make_exception_name(dtype, containerid),
                     f'time of exception on {dtype}',

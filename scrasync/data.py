@@ -5,7 +5,6 @@ import re
 
 from .parser import WebParser
 
-SPECIAL_TAGS = ['img']
 MEDIA_TAGS = ['img', 'video', 'canvas', 'audio']
 BLOCK_TAGS = MEDIA_TAGS + ['meta', 'button', 'nav']
 

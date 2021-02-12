@@ -15,7 +15,6 @@ NESTED_TAGS = ['wbr', 'a', 'b', 'abbr', 'bdi', 'dfn', 'cite', 'span', 'i',
 IGNORE_TAGS = ['br', 'img', 'input', 'hr']
 
 ENCODE_TO_JSON = 1
-HIRES_IMGS = 0
 
 
 def _clear_txt(_txt):

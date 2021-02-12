@@ -1,16 +1,13 @@
-
+""" The scraper. """
 import asyncio
-import json
 import re
+
+import pymongo
 
 from .app import celery
 from .async_http import run, run_with_tmp
-import pymongo
-
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from . import crawl_state
-from .decorators import save_task_id
-from .metrics import trackprogress
 from .misc.validate_url import ValidateURL
 from .tasks import parse_and_save
 
@@ -22,7 +19,7 @@ def check_content_type(request):
     return False
 
 
-class Scraper(object):
+class Scraper:
     """ Scraping web pages using asyncio with aiohttp. """
 
     def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
@@ -67,7 +64,7 @@ class Scraper(object):
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
         try:
-            resp = crawl_state.push_many(
+            crawl_state.push_many(
                 containerid=self.corpusid,
                 urls=self.endpoint_list,
                 crawlid=self.crawlid
@@ -160,7 +157,8 @@ def process_links(links):
     fragment identifeirs removed.
     """
 
-    def cleanup(x): return re.sub(r'#.*$', '', x)
+    def cleanup(x):
+        return re.sub(r'#.*$', '', x)
 
     return list(set(cleanup(item) if '#' in item else item
                     for item in links))
