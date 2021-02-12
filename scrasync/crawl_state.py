@@ -1,15 +1,14 @@
 """ The module getting the database connection, the database and the collection.
 """
 import datetime
-import enum
 import hashlib
 
 import bson
 from pymongo import MongoClient
 
 from .config.appconf import (
-    MONGO_CRAWL_RESULTS_COLL, MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION,
-    MONGO_RPC_DATABASE, MONGO_RPC_PASS, MONGO_RPC_USER
+    MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION, MONGO_RPC_DATABASE,
+    MONGO_RPC_PASS, MONGO_RPC_USER
 )
 from .decorators import state_args
 
@@ -74,28 +73,6 @@ class CrawlState:
         }
 
 
-class TaskId:
-    structure = {
-        'containerid': str,
-        'taskid': str,
-        'created': datetime.datetime
-    }
-
-    def __init__(self, containerid, taskid):
-
-        self.containerid = containerid
-        self.taskid = taskid
-        self.created = datetime.datetime.now()
-
-    def __call__(self):
-
-        return {
-            'containerid': self.containerid,
-            'taskid': self.taskid,
-            'created': self.created
-        }
-
-
 def make_key(*args):
     """ Making a unique key that identifies the container's state. """
     hasher = hashlib.blake2b(digest_size=64)
@@ -141,89 +118,6 @@ def state_list(crawlid: str = None, containerid: str = None):
     return coll.find({'crawlid': crawlid})
 
 
-@state_args
-def list_ready_false(containerid: str = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
-    return coll.find({
-        'containerid': containerid, 
-        'ready': False
-    })
-
-
-@state_args
-def list_ready_true(containerid: str = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
-    return coll.find({
-        'containerid': containerid, 
-        'ready': True,
-    })
-
-
-@state_args
-def set_ready_state_true(containerid: str = None, url: str = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
-    return coll.update_many({
-            'containerid': containerid, 
-            'url': url
-        },
-        {'$set': { 'ready': True }
-    })
-
-
 def get_saved_endpoints(containerid: (str, bson.ObjectId) = None):
     """ Returns alist of saved endpoints. """
     return [_.get('url') for _ in state_list(containerid=containerid)]
-
-
-
-# CELERY'S TASKIDS SAVED IN THE MONGO DATABASE --> STATUS CHECK
-# these are related to the monitoring of celery tasks with AsyncResult.
-# once this functionality is migrated to prometheus, they won't be needed.
-
-@state_args
-def push_taskid(containerid: (str, bson.ObjectId) = None, taskid: str = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
-    return coll.insert_one(TaskId(containerid=containerid, taskid=taskid)())
-
-
-@state_args
-def retrieve_taskids(containerid: (str, bson.ObjectId) = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
-    return coll.find({
-        'containerid': containerid
-    })
-
-
-def get_taskids(containerid: (str, bson.ObjectId) = None):
-
-    return (_.get('taskid') for _ in 
-            retrieve_taskids(containerid=containerid))
-
-
-@state_args
-def prune_taskids(containerid: (str, bson.ObjectId) = None):
-
-    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
-    return coll.remove({
-        'containerid': containerid
-    })
-
-
-@state_args
-def prune_all(containerid: (str, bson.ObjectId) = None):
-    
-    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
-    return coll.remove({'containerid': containerid})
-
-
-def remove_ready_tasks(docids: list = None):
-    """ remove records for tasks that succeded """
-    coll = get_collection(collection=MONGO_CRAWL_RESULTS_COLL)
-    docids = docids if all(isinstance(_, bson.ObjectId) for _ in docids) else \
-        [bson.ObjectId(_) for _ in docids]
-    return coll.delete_many({'_id': {'$in': docids}})
