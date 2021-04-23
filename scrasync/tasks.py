@@ -25,7 +25,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
     links = _dt.links
 
     celery.send_task(RMXBOT_TASKS.get('create_data'), kwargs={
-        'container_id': corpusid,
+        'containerid': corpusid,
         'endpoint': endpoint,
         'title': _dt.title,
         'data': _dt.out_data,
