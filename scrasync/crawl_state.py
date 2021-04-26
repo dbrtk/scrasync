@@ -52,6 +52,7 @@ class CrawlState:
         'ready': bool,
         'created': datetime.datetime
     }
+
     def __init__(self, containerid, url, crawlid: str = None):
 
         self.crawlid = crawlid
