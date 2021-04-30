@@ -22,13 +22,13 @@ def check_content_type(request):
 class Scraper:
     """ Scraping web pages using asyncio with aiohttp. """
 
-    def __init__(self, endpoint: list = None, corpusid: str = None, depth=1,
+    def __init__(self, endpoint: list = None, containerid: str = None, depth=1,
                  current_depth: int = 0, pages_count: int = 0,
                  target_path: str = None, crawlid: str = None):
         """ The initialisation of the scraper. """
         self.crawlid = crawlid if crawlid \
             else crawl_state.make_crawlid(
-                containerid=corpusid,
+                containerid=containerid,
                 seed=endpoint
             )
         self.endpoint_list = process_links(
@@ -40,7 +40,7 @@ class Scraper:
             self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
 
-        self.corpusid = corpusid
+        self.containerid = containerid
         self.target_path = target_path
 
         self.max_depth = depth
@@ -58,14 +58,14 @@ class Scraper:
         """ Getting rid of duplicated url(s). This method monitors endpoints
         sent to the scraper.
         """
-        saved_endpoint = crawl_state.get_saved_endpoints(self.corpusid)
+        saved_endpoint = crawl_state.get_saved_endpoints(self.containerid)
 
         if saved_endpoint:
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
         try:
             crawl_state.push_many(
-                containerid=self.corpusid,
+                containerid=self.containerid,
                 urls=self.endpoint_list,
                 crawlid=self.crawlid
             )
@@ -110,7 +110,7 @@ class Scraper:
                 'kwargs': {
                     'endpoint': url,
                     'path': tmp_path,
-                    'corpusid': self.corpusid
+                    'corpusid': self.containerid
                 }
             }
 
@@ -118,7 +118,7 @@ class Scraper:
                self.pages_count <= CRAWL_MAX_PAGES:
 
                 parameters['link'] = crawl_links.s(
-                    corpusid=self.corpusid,
+                    corpusid=self.containerid,
                     crawlid=self.crawlid,
                     current_depth=self.current_depth,
                     pages_count=self.pages_count,
