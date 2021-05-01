@@ -10,7 +10,6 @@ from .config.appconf import (
     MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION, MONGO_RPC_DATABASE,
     MONGO_RPC_PASS, MONGO_RPC_USER
 )
-from .decorators import state_args
 
 
 CLIENT = None
@@ -46,7 +45,7 @@ class CrawlState:
 
     structure = {
         'crawlid': str,
-        'containerid': bson.ObjectId,
+        'containerid': int,
         'url': str,
         'urlid': str,
         'ready': bool,
@@ -56,7 +55,7 @@ class CrawlState:
     def __init__(self, containerid, url, crawlid: str = None):
 
         self.crawlid = crawlid
-        self.containerid = bson.ObjectId(containerid)
+        self.containerid = int(containerid)
         self.url = url
         self.urlid = make_key(url)
         self.ready = False
@@ -82,7 +81,7 @@ def make_key(*args):
     return hasher.hexdigest()
 
 
-def make_crawlid(containerid: str = None, seed: (list, str) = None):
+def make_crawlid(containerid: int = None, seed: (list, str) = None):
     """ It calls the make_key function. The goal is to keep the ordering of
         arguments passed to make_key consistent.
 
@@ -96,8 +95,7 @@ def make_crawlid(containerid: str = None, seed: (list, str) = None):
 # below are functions that handle state per document/webpage being scraped
 
 
-@state_args
-def push_many(containerid: str = None, urls: list = None, crawlid: str = None):
+def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
     """ Push many items to the crawl_state collection. """
     coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
 
@@ -107,8 +105,7 @@ def push_many(containerid: str = None, urls: list = None, crawlid: str = None):
     ], ordered=False)
 
 
-@state_args
-def state_list(crawlid: str = None, containerid: str = None):
+def state_list(crawlid: str = None, containerid: int = None):
     """ For a containerid, retrieve all documents. This shows all active 
         processes (scraping, html cleanup, writng to disk).
     """
@@ -119,6 +116,6 @@ def state_list(crawlid: str = None, containerid: str = None):
     return coll.find({'crawlid': crawlid})
 
 
-def get_saved_endpoints(containerid: (str, bson.ObjectId) = None):
+def get_saved_endpoints(containerid: int = None):
     """ Returns alist of saved endpoints. """
     return [_.get('url') for _ in state_list(containerid=containerid)]

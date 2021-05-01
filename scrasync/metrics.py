@@ -39,8 +39,8 @@ def make_success_name(dtype: str = None, containerid: str = None):
     return f'{dtype}__{SUCCESS}_{containerid}'
 
 
-
 def trackprogress(dtype: str = None):
+
     def inner(func):
         @wraps(func)
         def wrapper(*args, **kwds):

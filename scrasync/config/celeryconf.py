@@ -39,7 +39,7 @@ task_routes = {
 
 RMXBOT_TASKS = {
 
-    'create_data': 'rmxbot.tasks.data.create_from_webpage',
+    'create_from_webpage': 'rmxbot.tasks.data.create_from_webpage',
 
     'file_extract_callback': 'rmxbot.tasks.container.file_extract_callback',
 

@@ -135,14 +135,21 @@ class Scraper:
 
 
 @celery.task(bind=True)
-def start_crawl(self, **kwds):
+def start_crawl(self,
+                endpoint: str = None,
+                containerid: int = None,
+                depth: int = None,
+                **kwargs):
     """ This task starts the crawler; it should be the parent task for others,
         that will follow.
     """
-    endpoint = kwds.get('endpoint')
     if isinstance(endpoint, str):
-        kwds['endpoint'] = [endpoint]
-    Scraper(**kwds)()
+        endpoint = [endpoint]
+    print(f"\n\n\n\n\n\nstart_crawl called with: {endpoint}, {containerid}, {depth}")
+    Scraper(endpoint=endpoint,
+            containerid=containerid,
+            depth=depth,
+            **kwargs)()
 
 
 @celery.task(bind=True)
