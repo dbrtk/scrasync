@@ -2,7 +2,7 @@
 import os
 
 from .app import celery
-from .config.celeryconf import RMXBOT_TASKS
+from .config.celeryconf import RMXWEB_TASKS
 from .data import DataToTxt
 from .metrics import trackprogress
 
@@ -24,7 +24,7 @@ def parse_and_save(self, path: str = None, endpoint: str = None,
         raise RuntimeError(_dt)
     links = _dt.links
 
-    celery.send_task(RMXBOT_TASKS.get('create_from_webpage'), kwargs={
+    celery.send_task(RMXWEB_TASKS.get('create_from_webpage'), kwargs={
         'containerid': corpusid,
         'endpoint': endpoint,
         'title': _dt.title,

@@ -1,4 +1,6 @@
 
+import re
+
 # rabbitmq related imports
 from .appconf import RPC_HOST, RPC_PASS, RPC_PORT, RPC_USER, RPC_VHOST
 
@@ -28,20 +30,20 @@ result_serializer = 'json'
 result_extended = True
 
 task_routes = {
+    re.compile(r'(data|crawl|container)\..*'): {'queue': 'rmxweb'},
 
     'scrasync.tasks.*': {'queue': 'scrasync'},
     'scrasync.scraper.*': {'queue': 'scrasync'},
-
-    'rmxbot.tasks.*': {'queue': 'rmxbot'},
-
-    'extractxt.tasks.*': {'queue': 'extractxt'},
 }
 
-RMXBOT_TASKS = {
+RMXWEB_TASKS = {
 
-    'create_from_webpage': 'rmxbot.tasks.data.create_from_webpage',
+    'create_from_webpage': 'data.tasks.create_from_webpage',
 
-    'file_extract_callback': 'rmxbot.tasks.container.file_extract_callback',
+    'file_extract_callback': 'container.tasks.file_extract_callback',
 
+    'push_many': 'crawl.tasks.push_many',
+    'get_saved_endpoints': 'crawl.tasks.get_saved_endpoints',
+    'delete_many': 'crawl.tasks.delete_many',
 }
-
+RMXWEB_QUEUE_NAME = 'rmxweb'
