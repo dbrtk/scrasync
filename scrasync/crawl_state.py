@@ -7,12 +7,12 @@ import hashlib
 # from pymongo import MongoClient
 
 from .app import celery
-
 # from .config.appconf import (
 #     MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION, MONGO_RPC_DATABASE,
 #     MONGO_RPC_PASS, MONGO_RPC_USER
 # )
-from .config.celeryconf import RMXWEB_TASKS, RMXWEB_QUEUE_NAME
+from .config.celeryconf import (
+    CELERY_GET_TIMEOUT, RMXWEB_TASKS, RMXWEB_QUEUE_NAME)
 
 
 CLIENT = None
@@ -125,10 +125,14 @@ def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
 
 
 def get_saved_endpoints(containerid: int = None):
-    """ Returns alist of saved endpoints. """
-    return celery.send_task(RMXWEB_TASKS['get_saved_endpoints'], kwargs={
+    """ Returns a list of saved endpoints. """
+    promise = celery.send_task(RMXWEB_TASKS['get_saved_endpoints'], kwargs={
         'containerid': containerid
-    }).get()
+    })
+    from celery.contrib import rdb
+    rdb.set_trace()
+
+    return promise.get(timeout=CELERY_GET_TIMEOUT)
     # return [_.get('url') for _ in state_list(containerid=containerid)]
 
 

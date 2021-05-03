@@ -47,3 +47,5 @@ RMXWEB_TASKS = {
     'delete_many': 'crawl.tasks.delete_many',
 }
 RMXWEB_QUEUE_NAME = 'rmxweb'
+
+CELERY_GET_TIMEOUT = 5
