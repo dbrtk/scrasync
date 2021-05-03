@@ -37,13 +37,14 @@ RPC_HOST = os.environ.get('RABBITMQ_HOST')
 RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
 
 # configurations for mongodb crawl status
-MONGO_RPC_DATABASE = os.environ.get('MONGO_RPC_DATABASE')
-MONGO_CRAWL_STATE_COLL = os.environ.get('MONGO_CRAWL_STATE_COLL')
+# todo(): delete all MONGO* configs
+# MONGO_RPC_DATABASE = os.environ.get('MONGO_RPC_DATABASE')
+# MONGO_CRAWL_STATE_COLL = os.environ.get('MONGO_CRAWL_STATE_COLL')
+# MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
+# MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
+# MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
 
-MONGO_RPC_USER = os.environ.get('MONGO_RPC_USER')
-MONGO_RPC_PASS = os.environ.get('MONGO_RPC_PASS')
-MONGODB_LOCATION = os.environ.get('MONGODB_LOCATION')
-
+# prometheus configuration
 PUSHGATEWAY_PORT = os.environ.get('PUSHGATEWAY_PORT')
 PUSHGATEWAY_HOST = os.environ.get('PUSHGATEWAY_HOST')
 PROMETHEUS_JOB = 'scrasync'

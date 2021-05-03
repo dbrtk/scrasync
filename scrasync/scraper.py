@@ -2,8 +2,6 @@
 import asyncio
 import re
 
-import pymongo
-
 from .app import celery
 from .async_http import run, run_with_tmp
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
@@ -63,19 +61,15 @@ class Scraper:
         if saved_endpoint:
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
-        try:
-            crawl_state.push_many(
-                containerid=self.containerid,
-                urls=self.endpoint_list,
-                crawlid=self.crawlid
-            )
-        except pymongo.errors.BulkWriteError as err:
 
-            dupli_urls = [_.get('keyValue').get('url')
-                          for _ in err.details['writeErrors']]
-            self.endpoint_list = list(
-                set(self.endpoint_list) - set(dupli_urls)
-            )
+        _, duplicates = crawl_state.push_many(
+            containerid=self.containerid,
+            urls=self.endpoint_list,
+            crawlid=self.crawlid
+        )
+        self.endpoint_list = list(
+            set(self.endpoint_list) - {i[0] for i in duplicates}
+        )
 
     def validated_urls(self, endpoint_list):
         """ Validating urls. """
