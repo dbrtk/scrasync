@@ -1,10 +1,8 @@
 
-import re
-
 # rabbitmq related imports
-from .appconf import RPC_HOST, RPC_PASS, RPC_PORT, RPC_USER, RPC_VHOST
+from djproject.scrasync.config.appconf import RPC_HOST, RPC_PASS, RPC_PORT, RPC_USER, RPC_VHOST
 
-from .appconf import BROKER_HOST_NAME, REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT
+from djproject.scrasync.config.appconf import BROKER_HOST_NAME, REDIS_DB_NUMBER, REDIS_PASS, REDIS_PORT
 
 # broker_url = 'amqp://myuser:mypassword@localhost:5672/myvhost'
 _url = f'amqp://{RPC_USER}:{RPC_PASS}@{RPC_HOST}:{RPC_PORT}/{RPC_VHOST}'
@@ -30,8 +28,6 @@ result_serializer = 'json'
 result_extended = True
 
 task_routes = {
-    re.compile(r'(data|crawl|container)\..*'): {'queue': 'rmxweb'},
-
     'scrasync.tasks.*': {'queue': 'scrasync'},
     'scrasync.scraper.*': {'queue': 'scrasync'},
 }

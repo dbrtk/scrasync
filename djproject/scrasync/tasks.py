@@ -2,7 +2,7 @@
 import os
 
 from .app import celery
-from .config.celeryconf import RMXWEB_TASKS
+from djproject.djproject.celery_settings import RMXWEB_TASKS
 from .data import DataToTxt
 from .metrics import trackprogress
 

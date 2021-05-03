@@ -11,7 +11,7 @@ from .app import celery
 #     MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION, MONGO_RPC_DATABASE,
 #     MONGO_RPC_PASS, MONGO_RPC_USER
 # )
-from .config.celeryconf import (
+from djproject.djproject.celery_settings import (
     CELERY_GET_TIMEOUT, RMXWEB_TASKS, RMXWEB_QUEUE_NAME)
 
 
