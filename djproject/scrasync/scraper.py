@@ -2,7 +2,7 @@
 import asyncio
 import re
 
-from .app import celery
+from djproject.app import celery
 from .async_http import run, run_with_tmp
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from . import crawl_state
@@ -62,7 +62,7 @@ class Scraper:
             self.endpoint_list = list(
                 set(self.endpoint_list) - set(saved_endpoint))
 
-        _, duplicates = crawl_state.push_many(
+        duplicates = crawl_state.push_many(
             containerid=self.containerid,
             urls=self.endpoint_list,
             crawlid=self.crawlid
@@ -139,7 +139,6 @@ def start_crawl(self,
     """
     if isinstance(endpoint, str):
         endpoint = [endpoint]
-    print(f"\n\n\n\n\n\nstart_crawl called with: {endpoint}, {containerid}, {depth}")
     Scraper(endpoint=endpoint,
             containerid=containerid,
             depth=depth,

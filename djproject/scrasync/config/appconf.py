@@ -22,19 +22,20 @@ CRAWL_MAX_PAGES = 500
 
 # REDIS CONFIG
 # celery, redis (auth access) configuration
-BROKER_HOST_NAME = os.environ.get('BROKER_HOST_NAME')
-REDIS_PASS = os.environ.get('REDIS_PASS')
-REDIS_DB_NUMBER = os.environ.get('REDIS_DB_NUMBER')
-REDIS_PORT = os.environ.get('REDIS_PORT')
-
-# login credentials for RabbitMQ.
-RPC_PASS = os.environ.get('RABBITMQ_DEFAULT_PASS')
-RPC_USER = os.environ.get('RABBITMQ_DEFAULT_USER')
-RPC_VHOST = os.environ.get('RABBITMQ_DEFAULT_VHOST')
-
-# the host to which the rpc broker (rabbitmq) is deployed
-RPC_HOST = os.environ.get('RABBITMQ_HOST')
-RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
+# todo(): delete celery variables
+# BROKER_HOST_NAME = os.environ.get('BROKER_HOST_NAME')
+# REDIS_PASS = os.environ.get('REDIS_PASS')
+# REDIS_DB_NUMBER = os.environ.get('REDIS_DB_NUMBER')
+# REDIS_PORT = os.environ.get('REDIS_PORT')
+#
+# # login credentials for RabbitMQ.
+# RPC_PASS = os.environ.get('RABBITMQ_DEFAULT_PASS')
+# RPC_USER = os.environ.get('RABBITMQ_DEFAULT_USER')
+# RPC_VHOST = os.environ.get('RABBITMQ_DEFAULT_VHOST')
+#
+# # the host to which the rpc broker (rabbitmq) is deployed
+# RPC_HOST = os.environ.get('RABBITMQ_HOST')
+# RPC_PORT = os.environ.get('RABBITMQ_PORT', 5672)
 
 # configurations for mongodb crawl status
 # todo(): delete all MONGO* configs

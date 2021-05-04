@@ -1,10 +1,11 @@
 """ Tasks for scrasync. """
 import os
 
-from .app import celery
-from djproject.djproject.celery_settings import RMXWEB_TASKS
+from djproject.app import celery
+from djproject.celery_settings import RMXWEB_TASKS
 from .data import DataToTxt
 from .metrics import trackprogress
+from .models import CrawlState
 
 
 @celery.task(bind=True)
@@ -47,3 +48,9 @@ def test_task(a, b):
         'result': a ** b
     }
 
+
+@celery.task
+def delete_many(containerid: int = None, crawlid: str = None):
+    """Delete many tasks; preferably all the tasks for the crawl.
+    """
+    CrawlState.delete_many(containerid=containerid, crawlid=crawlid)
