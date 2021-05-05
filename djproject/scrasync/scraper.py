@@ -3,6 +3,7 @@ import asyncio
 import re
 
 from djproject.app import celery
+from djproject.celery_settings import SCRASYSNC_TASKS
 from .async_http import run, run_with_tmp
 from .config.appconf import CRAWL_MAX_PAGES, TEXT_C_TYPES
 from . import crawl_state
@@ -24,11 +25,14 @@ class Scraper:
                  current_depth: int = 0, pages_count: int = 0,
                  target_path: str = None, crawlid: str = None):
         """ The initialisation of the scraper. """
-        self.crawlid = crawlid if crawlid \
-            else crawl_state.make_crawlid(
-                containerid=containerid,
-                seed=endpoint
-            )
+        # self.crawlid = crawlid if crawlid \
+        #     else crawl_state.make_crawlid(
+        #         containerid=containerid,
+        #         seed=endpoint
+        #     )
+        if not crawlid:
+            raise RuntimeError('The crawlid is missing.')
+        self.crawlid = crawlid
         self.endpoint_list = process_links(
             list(set(self.validated_urls(endpoint)))
         )
@@ -52,11 +56,13 @@ class Scraper:
         # self.filter_on_ctype()
         self.retrieve()
 
+    def get_crawlid(self): return self.crawlid
+
     def endpoint_ditch_dupli(self):
         """ Getting rid of duplicated url(s). This method monitors endpoints
         sent to the scraper.
         """
-        saved_endpoint = crawl_state.get_saved_endpoints(self.containerid)
+        saved_endpoint = crawl_state.get_saved_endpoints(crawlid=self.crawlid)
 
         if saved_endpoint:
             self.endpoint_list = list(
@@ -100,38 +106,63 @@ class Scraper:
             self.pages_count += 1
 
             parameters = {
-
                 'kwargs': {
                     'endpoint': url,
                     'path': tmp_path,
-                    'corpusid': self.containerid
+                    'containerid': self.containerid
                 }
             }
-
             if self.current_depth < self.max_depth and \
                self.pages_count <= CRAWL_MAX_PAGES:
 
                 parameters['link'] = crawl_links.s(
-                    corpusid=self.containerid,
+                    containerid=self.containerid,
                     crawlid=self.crawlid,
                     current_depth=self.current_depth,
                     pages_count=self.pages_count,
                     depth=self.max_depth
                 )
-
-            parse_and_save.apply_async(**parameters)
+            celery.send_task(SCRASYSNC_TASKS['parse_and_save'], **parameters)
+            # todo(): delete the call below
+            # parse_and_save.apply_async(**parameters)
 
     def filter_on_ctype(self):
         """ Filtering the list of urls, based on the content type. """
 
         self.endpoint_list = [
-            _[2] for _ in self.head() if check_content_type(_[0])]
+            _[2] for _ in self.head() if check_content_type(_[0])
+        ]
+
+
+@celery.task(bind=True)
+def launch_crawl(self,
+                 endpoint: str = None,
+                 containerid: int = None,
+                 depth: int = None,
+                 **kwargs):
+    """ This task launches the crawler; it is the parent task for other tasks
+    that make the crawler. In this task a crawlid is created. The latter
+    identifies the process for other tasks.
+    """
+    # making the crawlid
+    crawlid = crawl_state.make_crawlid(
+        containerid=containerid,
+        seed=endpoint
+    )
+    celery.send_task(SCRASYSNC_TASKS['start_crawl'], kwargs={
+        'endpoint': endpoint,
+        'crawlid': crawlid,
+        'containerid': containerid,
+        'depth': depth,
+    })
+    return crawlid
 
 
 @celery.task(bind=True)
 def start_crawl(self,
                 endpoint: str = None,
                 containerid: int = None,
+                crawlid: str = None,
                 depth: int = None,
                 **kwargs):
     """ This task starts the crawler; it should be the parent task for others,
@@ -140,6 +171,7 @@ def start_crawl(self,
     if isinstance(endpoint, str):
         endpoint = [endpoint]
     Scraper(endpoint=endpoint,
+            crawlid=crawlid,
             containerid=containerid,
             depth=depth,
             **kwargs)()

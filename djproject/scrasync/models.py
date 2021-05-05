@@ -1,18 +1,21 @@
 
 from django.db import models
 
-# from container.models import Container
+from .config.appconf import HEXDIGEST_SIZE
 
 
 class CrawlState(models.Model):
+    """
+    The model for the crawl state - this is used by scrasync to store the crawl
+    status.
 
-    crawlid = models.CharField(max_length=50, blank=True, null=True)
-
-    # container = models.ForeignKey(Container, on_delete=models.CASCADE)
-    containerid = models.IntegerField()
-
+    `crawlid` and `urlid` store digest values of blake2b with a default size of
+    64 bytes.
+    """
+    crawlid = models.CharField(max_length=HEXDIGEST_SIZE, null=True)
+    # containerid = models.IntegerField()
     url = models.URLField()
-    urlid = models.CharField(max_length=300, blank=True, null=True)
+    urlid = models.CharField(max_length=HEXDIGEST_SIZE, null=True)
     ready = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -43,16 +46,13 @@ class CrawlState(models.Model):
     #     return obj
 
     @classmethod
-    def push_many(cls, containerid: int = None, urls: list = None,
-                  crawlid: str = None):
+    def push_many(cls, urls: list = None, crawlid: str = None):
         """
         Push many items to the crawl_state collection.
-        :param containerid:
         :param urls:
         :param crawlid:
         :return:
         """
-        # container = Container.get_object(containerid)
         try:
             duplicates = cls.objects.filter(
                 crawlid=crawlid, url__in=[_[0] for _ in urls]
@@ -62,8 +62,7 @@ class CrawlState(models.Model):
         duplicates = [(_.url, _.urlid) for _ in duplicates]
         urls = list(set(urls).difference(duplicates))
         objs = cls.objects.bulk_create([
-            cls(containerid=containerid,
-                url=url,
+            cls(url=url,
                 crawlid=crawlid,
                 urlid=urlid)
             for url, urlid in urls
@@ -71,31 +70,28 @@ class CrawlState(models.Model):
         return objs, duplicates
 
     @classmethod
-    def state_list(cls, crawlid: str = None, containerid: int = None):
+    def state_list(cls, crawlid: str = None):
         """ For a containerid, retrieve all documents. This shows all active
             processes (scraping, html cleanup, writing to disk).
         """
-        # container = Container.get_object(containerid)
         try:
-            return cls.objects.filter(containerid=containerid)
+            return cls.objects.filter(crawlid=crawlid)
         except cls.DoesNotExist:
             return []
 
     @classmethod
-    def get_saved_endpoints(cls, containerid: int = None):
-        """ Returns alist of saved endpoints. """
-        return [_.url for _ in cls.state_list(containerid=containerid)]
+    def get_saved_endpoints(cls, crawlid: str = None):
+        """ Returns a list of saved endpoints. """
+        return [_.url for _ in cls.state_list(crawlid=crawlid)]
 
     @classmethod
-    def delete_many(cls, containerid: int = None, crawlid: str = None):
+    def delete_many(cls, crawlid: str = None):
         """
         Deletes many objects from the database.
-        :param containerid:
         :param crawlid:
         :return:
         """
-        # container = Container.get_object(containerid)
         try:
-            cls.objects.filter(containerid=containerid).delete()
+            cls.objects.filter(crawlid=crawlid).delete()
         except cls.DoesNotExist:
             pass

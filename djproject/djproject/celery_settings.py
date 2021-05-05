@@ -1,4 +1,7 @@
 
+import os
+import re
+
 # REDIS CONFIG
 # celery, redis (auth access) configuration
 BROKER_HOST_NAME = os.environ.get('BROKER_HOST_NAME')
@@ -50,6 +53,7 @@ RMXWEB_TASKS = {
 
     'file_extract_callback': 'container.tasks.file_extract_callback',
 
+    # todo(): delete this
     # 'push_many': 'crawl.tasks.push_many',
     # 'get_saved_endpoints': 'crawl.tasks.get_saved_endpoints',
     # 'delete_many': 'crawl.tasks.delete_many',
@@ -57,9 +61,12 @@ RMXWEB_TASKS = {
 
 SCRASYSNC_TASKS = {
 
-    'delete_many': 'scrasync.tasks.delete_many',
+    # todo(): delete this
+    # 'delete_many': 'scrasync.tasks.delete_many',
 
+    'start_crawl': 'scrasync.scraper.start_crawl',
 
+    'parse_and_save': 'scrasync.tasks.parse_and_save',
 }
 
 RMXWEB_QUEUE_NAME = 'rmxweb'

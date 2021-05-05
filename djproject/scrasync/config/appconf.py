@@ -3,11 +3,12 @@ import os
 
 __HERE = os.path.abspath(__file__)
 
+# todo(): delete this.
+# DATA_FOLDER = os.path.abspath(os.path.join(
+#     __HERE, os.pardir, os.pardir, os.pardir, 'data'))
 
-DATA_FOLDER = os.path.abspath(os.path.join(
-    __HERE, os.pardir, os.pardir, os.pardir, 'data'))
-
-USER_AGENTS_FILE = os.path.join(DATA_FOLDER, 'user-agents.txt')
+USER_AGENTS_FILE = os.path.join(
+    os.environ.get('PATH_TO_DATA'), 'user-agents.txt')
 
 HTTP_TIMEOUT = 10
 
@@ -49,4 +50,10 @@ CRAWL_MAX_PAGES = 500
 PUSHGATEWAY_PORT = os.environ.get('PUSHGATEWAY_PORT')
 PUSHGATEWAY_HOST = os.environ.get('PUSHGATEWAY_HOST')
 PROMETHEUS_JOB = 'scrasync'
+
+
+# HEXDIGEST FOR THE HASH
+
+DIGEST_SIZE = 64
+HEXDIGEST_SIZE = 128
 

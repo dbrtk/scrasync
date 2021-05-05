@@ -10,3 +10,5 @@ prometheus_client
 requests
 
 remote_pdb
+
+psycopg2-binary

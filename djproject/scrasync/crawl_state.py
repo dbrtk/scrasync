@@ -6,6 +6,7 @@ import hashlib
 # import bson
 # from pymongo import MongoClient
 
+from .config.appconf import DIGEST_SIZE
 from djproject.app import celery
 # from .config.appconf import (
 #     MONGO_CRAWL_STATE_COLL, MONGODB_LOCATION, MONGO_RPC_DATABASE,
@@ -78,10 +79,9 @@ CLIENT = None
 #             'created': self.created
 #         }
 
-
 def make_key(*args):
     """ Making a unique key that identifies the container's state. """
-    hasher = hashlib.blake2b(digest_size=64)
+    hasher = hashlib.blake2b(digest_size=DIGEST_SIZE)
     for i in args:
         hasher.update(bytes(str(i), 'utf-8'))
     return hasher.hexdigest()
@@ -100,21 +100,6 @@ def make_crawlid(containerid: int = None, seed: (list, str) = None):
 
 # below are functions that handle state per document/webpage being scraped
 
-def push_many_remote(containerid: int = None, urls: list = None, crawlid: str = None):
-    """ Push many items to the crawl_state collection.
-    Urls are contained in a list of tuples with a url and a urlid:
-    (url, urlid).
-    """
-    # todo(): delete this function - the use of rpc tasks for this is
-    #  deprecated
-    urls = [(url, make_key(url)) for url in urls]
-    return celery.send_task(RMXWEB_TASKS['push_many'], kwargs={
-        'containerid': containerid,
-        'urls': urls,
-        'crawlid': crawlid
-    }).get()
-
-
 def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
     """ Push many items to the crawl_state collection.
     Urls are contained in a list of tuples with a url and a urlid:
@@ -122,7 +107,6 @@ def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
     """
     urls = [(url, make_key(url)) for url in urls]
     objs, duplicates = CrawlState.push_many(
-        containerid=containerid,
         urls=urls,
         crawlid=crawlid
     )
@@ -140,26 +124,11 @@ def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
 #     return coll.find({'crawlid': crawlid})
 
 
-def get_saved_endpoints_remote(containerid: int = None):
+def get_saved_endpoints(containerid: int = None, crawlid: str = None):
     """ Returns a list of saved endpoints. """
-    # todo(): delete this function
-    promise = celery.send_task(RMXWEB_TASKS['get_saved_endpoints'], kwargs={
-        'containerid': containerid
-    })
-    from celery.contrib import rdb
-    rdb.set_trace()
-
-    return promise.get(timeout=CELERY_GET_TIMEOUT)
-    # return [_.get('url') for _ in state_list(containerid=containerid)]
+    return [_.url for _ in CrawlState.state_list(crawlid=crawlid)]
 
 
-def get_saved_endpoints(containerid: int = None):
-    """ Returns a list of saved endpoints. """
-    return [_.get('url') for _ in
-            CrawlState.state_list(containerid=containerid)]
-
-
-#
 # def push_many(containerid: int = None, urls: list = None, crawlid: str = None):
 #     """ Push many items to the crawl_state collection. """
 #     coll = get_collection(collection=MONGO_CRAWL_STATE_COLL)
