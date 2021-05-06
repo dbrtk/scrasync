@@ -58,6 +58,7 @@ RMXWEB_TASKS = {
     # 'get_saved_endpoints': 'crawl.tasks.get_saved_endpoints',
     # 'delete_many': 'crawl.tasks.delete_many',
 }
+RMXWEB_QUEUE = 'rmxweb'
 
 SCRASYSNC_TASKS = {
 

@@ -144,7 +144,6 @@ def launch_crawl(self,
     that make the crawler. In this task a crawlid is created. The latter
     identifies the process for other tasks.
     """
-    # making the crawlid
     crawlid = crawl_state.make_crawlid(
         containerid=containerid,
         seed=endpoint

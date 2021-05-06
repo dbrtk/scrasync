@@ -8,7 +8,7 @@ __HERE = os.path.abspath(__file__)
 #     __HERE, os.pardir, os.pardir, os.pardir, 'data'))
 
 USER_AGENTS_FILE = os.path.join(
-    os.environ.get('PATH_TO_DATA'), 'user-agents.txt')
+    os.environ.get('PATH_TO_DATA', ''), 'user-agents.txt')
 
 HTTP_TIMEOUT = 10
 
@@ -54,6 +54,6 @@ PROMETHEUS_JOB = 'scrasync'
 
 # HEXDIGEST FOR THE HASH
 
-DIGEST_SIZE = 64
-HEXDIGEST_SIZE = 128
+DIGEST_SIZE = 15
+HEXDIGEST_SIZE = 30
 
