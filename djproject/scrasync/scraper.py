@@ -25,11 +25,6 @@ class Scraper:
                  current_depth: int = 0, pages_count: int = 0,
                  target_path: str = None, crawlid: str = None):
         """ The initialisation of the scraper. """
-        # self.crawlid = crawlid if crawlid \
-        #     else crawl_state.make_crawlid(
-        #         containerid=containerid,
-        #         seed=endpoint
-        #     )
         if not crawlid:
             raise RuntimeError('The crawlid is missing.')
         self.crawlid = crawlid
@@ -123,8 +118,6 @@ class Scraper:
                     depth=self.max_depth
                 )
             celery.send_task(SCRASYSNC_TASKS['parse_and_save'], **parameters)
-            # todo(): delete the call below
-            # parse_and_save.apply_async(**parameters)
 
     def filter_on_ctype(self):
         """ Filtering the list of urls, based on the content type. """
